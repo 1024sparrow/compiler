@@ -1,0 +1,16 @@
+{
+  "name": "compile",
+  "version": "1.0.0",
+  "description": "utility to build projects. Like 'make'. Supports hierarchical project structure.",
+  "main": "compile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "VasilyevBP",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^2.11.0",
+    "fs-extra": "^4.0.2",
+    "tmp": "0.0.33"
+  }
+}
