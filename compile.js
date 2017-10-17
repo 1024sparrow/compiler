@@ -5,7 +5,7 @@ var path = require('path');
 var fs = require('fs');
 var fse = require('fs-extra');
 var child_process = require('child_process');
-var tmpFilePath = require('tmp').fileSync();
+var tmpFile = require('tmp').fileSync();
 program.version('1.0')
     .option('-i, --info', 'Показать информацию по предстоящей сборке');
 program.on('--help', function(){
@@ -85,13 +85,14 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
                             const tmpFunc = processor.file[filetype];
                             const tmpType = typeof tmpFunc;
                             if (tmpType === 'string'){
-                                fs.writeFileSync(tmpFilePath, tmp, 'utf8');
+                                fs.writeFileSync(tmpFile.name, tmp, 'utf8');
                                 console.log(
                                         child_process.execSync(
                                             path.resolve(processorDirPath, tmpFunc) + ' ' + tmpFile.name
                                             )
                                         );
-                                tmpFile.cleanupCallback();
+                                tmp = fs.readFileSync(tmpFile.name, 'utf8');
+                                //tmpFile.cleanupCallback();
                             }
                             else if (tmpType === 'function'){
                                 tmp = tmpFunc(tmp);
@@ -110,6 +111,37 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
                     retval = retval.replace(new RegExp(`{%% ${srcFile} %%}`, 'gm'), tmp);
                 else
                     retval += tmp;
+            }
+            //Применяем обработчики к получившемуся файлу
+            if (file.hasOwnProperty('type')){
+                for (const filetype of file.type){
+                    if (processor.file.hasOwnProperty(filetype)){
+                        const tmpFunc = processor.file[filetype];
+                        const tmpType = typeof tmpFunc;
+                        if (tmpType === 'string'){
+                            fs.writeFileSync(tmpFile.name, retval, 'utf8');
+                            console.log(
+                                    child_process.execSync(
+                                        path.resolve(processorDirPath, tmpFunc) + ' ' + tmpFile.name
+                                        )
+                                    .toString()
+                                    );
+                            retval = fs.readFileSync(tmpFile.name, 'utf8');
+                            //tmpFile.cleanupCallback();
+                        }
+                        else if (tmpType === 'function'){
+                            retval = tmpFunc(retval);
+                        }
+                        else{
+                            console.log(`Для типа файла ${filetype} указан некорректный обработчик: операция компиляции прервана.`);
+                            return false;
+                        }
+                    }
+                    else{
+                        console.log(`Для типа файла ${filetype} указан некорректный обработчик: операция компиляции прервана.`);
+                        return false;
+                    }
+                }
             }
             fs.writeFileSync(tmpDestPath + '/' + file.target, retval);
         }
