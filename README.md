@@ -75,14 +75,13 @@ $ cd <где_будут_лежать_у_вас_исходники>
 $ git clone https://github.com/1024sparrow/compiler.git
 $ cd compiler
 $ npm install
-$ a=$(pwd)
-$ cd /usr/local/bin/
-$ sudo ln -s ${a}/compile.js compile
+$ sudo ln -s $(pwd)/compile.js /usr/local/bin/compile
 ```
 Теперь в командной строке из любой директории вам доступна команда
 ```sh
-$ compile
+$ compile --help
 ```
+С ключом '--help' будет отображена справка по доступным ключам, а также будет выведена вся необходимая для работы информация.
 
 См. также:
 * [node-minify](https://www.npmjs.com/package/node-minify)
