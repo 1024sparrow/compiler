@@ -1,5 +1,5 @@
-# compiler
-> Утилита для сборки проектов.
+# compile
+> Утилита для сборки проектов. Для сборки правила можно как писать в виде функций на JavaScript, так и в виде скриптов на bash, python, js, sed, awk или любом наиболее подходящем для вас языке.
 Программа принимает в качестве параметра путь к compile.ini.
 Имя файла 'compile.ini' упоминается условно - вы можете произвольным образом назвать этот файл. Я, например, называю его как '<название_проекта>.pro'.
 В папках с исходниками предполагается наличие файлов __meta__ (если такого файла в папке нет, то компилироваться папка не будет)
@@ -61,20 +61,36 @@ module.exports = {
 ```
 Что он делает - сохраняет директорию как есть. Если файл __meta__ отсутсвует или в нём нет свойства 'dir_proc', такой папки в результатах компиляции не будет.
 
-См. также:
-    - https://www.npmjs.com/package/node-minify
-    - var stripComments = require('strip-comments');data = stripComments(data);
-## Running tests
-
-Install dev dependencies:
-
+## Установка
+Для работы программы требуется NodeJS (версии не младше v6.11.0).
 ```sh
-$ npm i -d && npm test
+$ git clone https://github.com/1024sparrow/compiler.git
+$ cd compiler
+$ npm install
+```
+Ну вот и всё - теперь мы можете использовать compile.js в своей работе.
+Если хотите поставить compile.js в систему, чтобы где бы вы не были, имели доступ к этой утилите, вам необходимо создать директорию (например, ~/opt/), где у вас будет лежать этот скрипт вместе с установленными зависимостями, и создать символическую ссылку ссылку на compile.js в /usr/local/bin/ :
+```sh
+$ cd <где_будут_лежать_у_вас_исходники>
+$ git clone https://github.com/1024sparrow/compiler.git
+$ cd compiler
+$ npm install
+$ a=$(pwd)
+$ cd /usr/local/bin/
+$ sudo ln -s ${a}/compile.js compile
+```
+Теперь в командной строке из любой директории вам доступна команда
+```sh
+$ compile
 ```
 
-## Contributing
+См. также:
+* [node-minify](https://www.npmjs.com/package/node-minify)
+* [strip-comments](https://www.npmjs.com/package/strip-comments)
 
-Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](https://github.com/jonschlinkert/strip-comments/issues/new).
+## Поддержка
+
+Использование программы бесплатное. Вопросы, предложения, а также запросы на исправление ошибок программы, пожалуйста, оставляйте [здесь](https://github.com/1024sparrow/compile/issues/new).
 
 ## Автор
 
