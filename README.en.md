@@ -1,11 +1,11 @@
 # compiler
-> Утилита для сборки проектов. Для сборки правила можно как писать в виде функций на JavaScript, так и в виде скриптов на bash, python, js, sed, awk или любом наиболее подходящем для вас языке.
-Программа принимает в качестве параметра путь к compile.ini.
-Имя файла 'compile.ini' упоминается условно - вы можете произвольным образом назвать этот файл. Я, например, называю его как '<название_проекта>.pro'.
-В папках с исходниками предполагается наличие файлов __meta__ (если такого файла в папке нет, то компилироваться папка не будет)
+> Utility for projects building. Build rules could be written both either as JavaScript functions or as collection of scripts in any language(s) you prefer.
+The program takes a parameter with path to 'compile.ini'.
+Filename 'compile.ini' mentions conditionally - you can name such file with any filename. For example, I name such files as '<project_name>.pro'.
+In directories with sources there's expecting to be files '__meta__'. If file __meta__ is missing, the directory will not compile.
 ## compile.ini:
-Здесь определяются правила компиляции (строковый идентификатор и обрабатывающая функция(на JavaScript))
-Оформляется как NodeJS-модуль:
+Here define compile rules (string identifier and processing function on JavaScript (or path to processing script to be run instead)).
+'compile.ini' recorded as a NodeJs module:
 ```js
 module.exports = {
     target: 'compiled', // <-- здесь будет формироваться результат компиляции
