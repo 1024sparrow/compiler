@@ -147,18 +147,27 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
         fs.unlinkSync(`${tmpDestPath}/__meta__`);
     }
     if (bD){
-        //fs.renameSync(tmpDestPath, destPath);
-        fse.moveSync(tmpDestPath, destPath);//boris here: bug (пытается затереть содержимое целевой директории (надо не заместить её содержимое, а добавить))
+        fs.renameSync(tmpDestPath, destPath);
+        //fse.moveSync(tmpDestPath, destPath);//boris here: bug (пытается затереть содержимое целевой директории (надо не заместить её содержимое, а добавить))
                     //если и тогда будет пытаться переписать существующий файл(дир.-ю), должны аварийно прервать сборку с соответствующим сообщением
+
+        //если такая директория уже есть, то перемещать туда содержимое
+        mergeDirs(tmpDestPath, destPath);
         for (const dirFuncId of meta.dir_proc){
             if (processor.dir.hasOwnProperty(dirFuncId)){
                 const tmpFunc = processor.dir[dirFuncId];
                 const tmpType = typeof tmpFunc;
+                const p1 = path.dirname(destPath);
+                const p2 = destPath.match(/([^\/])*$/g)[0];
                 if (tmpType === 'string'){
-                    console.log(child_process.execSync(path.resolve(processorDirPath, tmpFunc)));
+                    console.log(
+                            child_process.execSync(
+                                `${path.resolve(processorDirPath, tmpFunc)} ${p1} ${p2}`
+                                )
+                            );
                 }
                 else if (tmpType === 'function'){
-                    tmpFunc(path.dirname(destPath), destPath.match(/([^\/])*$/g)[0]);
+                    tmpFunc(p1, p2);
                 }
                 else{
                     console.log(`Для типа директории '${dirFuncId}' указан некорректный обработчик: опреация компиляции прервана.`);
@@ -206,6 +215,10 @@ function copyDirContent(srcDirPath, destDirPath){
             }
         }
     }
+}
+function mergeDirs(p_fromDir, p_toDir){
+    var stack = [];
+    //boris here
 }
 program.parse(process.argv);
 
