@@ -69,10 +69,6 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
     createFullPath(tmpDestPath);
     const bF = meta.hasOwnProperty('files');
     const bD = meta.hasOwnProperty('dir_proc');
-    /*if (!bF && !bD){ <-- содержимое директории будет распакован уровнем выше
-        console.log('incorrect __meta__ at \''+srcPath+'\'');
-        return false;
-    }*/
     if (bF){
         for (const file of meta.files){
             const hasTempl = file.source.hasOwnProperty('template');
@@ -151,7 +147,9 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
         fs.unlinkSync(`${tmpDestPath}/__meta__`);
     }
     if (bD){
-        fs.renameSync(tmpDestPath, destPath);
+        //fs.renameSync(tmpDestPath, destPath);
+        fse.moveSync(tmpDestPath, destPath);//boris here: bug (пытается затереть содержимое целевой директории (надо не заместить её содержимое, а добавить))
+                    //если и тогда будет пытаться переписать существующий файл(дир.-ю), должны аварийно прервать сборку с соответствующим сообщением
         for (const dirFuncId of meta.dir_proc){
             if (processor.dir.hasOwnProperty(dirFuncId)){
                 const tmpFunc = processor.dir[dirFuncId];
