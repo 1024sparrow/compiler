@@ -69,10 +69,10 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
     createFullPath(tmpDestPath);
     const bF = meta.hasOwnProperty('files');
     const bD = meta.hasOwnProperty('dir_proc');
-    if (!bF && !bD){
+    /*if (!bF && !bD){ <-- содержимое директории будет распакован уровнем выше
         console.log('incorrect __meta__ at \''+srcPath+'\'');
         return false;
-    }
+    }*/
     if (bF){
         for (const file of meta.files){
             const hasTempl = file.source.hasOwnProperty('template');
