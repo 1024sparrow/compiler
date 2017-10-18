@@ -1,25 +1,26 @@
 # compiler
-> Utility for projects building. Build rules could be written both either as JavaScript functions or as collection of scripts in any language(s) you prefer.
+> Utility for projects building. Build rules can be written both either as JavaScript functions or as collection of scripts in any language(s) you prefer.
 The program takes a parameter with path to 'compile.ini'.
-Filename 'compile.ini' mentions conditionally - you can name such file with any filename. For example, I name such files as '<project_name>.pro'.
+The filename 'compile.ini' mentions conditionally - you can name such file with any filename. For example, I name such files as '<project_name>.pro'.
 In directories with sources there's expecting to be files '__meta__'. If file __meta__ is missing, the directory will not compile.
+Inside directories with __meta__ may be other, nesting subdirectories with another __meta__: at first will be processed nested __meta__, then the __meta__ of containing them directory.
 ## compile.ini:
 Here define compile rules (string identifier and processing function on JavaScript (or path to processing script to be run instead)).
 'compile.ini' recorded as a NodeJs module:
 ```js
 module.exports = {
-    target: 'compiled', // <-- здесь будет формироваться результат компиляции
-    file_script_dir: '', //* относительный путь к директории, относительно которой будут указываться пути к скриптам для обработки файлов. Если свойство не указано - пути относительно директории, где находится файл compile.ini.
+    target: 'compiled', // <-- here "compiler" will be put result to
+    file_script_dir: '', //* relative path to derectory, regarding which paths to file processing scripts will be defined relatively. If this property missed, paths will be start from that directory, where is situated 'compile.ini'.
     file: {
-        css:function(srcText){ // <-- типы файлов 'css' будут обрабатываться вот этой функцией. Функция должна вернуть результат в виде строки.
+        css:function(srcText){ // <-- files of type 'css' will be processed by this function. This function must return result as string.
         }
-        // вместо функции можно указать путь к скрипту, который должен преобразовать данные в файле, полный путь к которому будет передан единственным параметром.
+        // There's available point path to a script instead of JavaScript-function. That script must transform content in file, full path of which will be passed into the script by single parameter.
     },
-    dir_script_dir: '', //* относительный путь к директории, относительно которой будут указываться пути к скриптам для обработки директорий. Если свойство не указано - пути относительно директории, где находится файл compile.ini.
+    dir_script_dir: '', //* relative path to derectory, regarding which paths to directory processing scripts will be defined relatively. If this property missed, paths will be start from that directory, where is situated 'compile.ini'.
     dir: {
-        tab_app:function(dirPath, dirName){ // <--передаётся абсолютный путь до папки, содержащей целевую папку, и имя целевой папки. Этот обработчик будет применяться к директориям, помеченным как 'tab_app'.
+        tab_app:function(dirPath, dirName){ // <-- this function takes absolute path to directory, which contains target directory, and the target directory. This processor will be applyed to directories, marked as 'tab_app'.
         }
-        // вместо функции можно указать путь к скрипту, который должен преобразовать директорию. Скрипту передаются два параметра - такие, как передавались бы в фунцию (см. выше).
+        // There's available point path to a script instead of JavaScript-function. That script takes two parameters - such as would be passed to the function (see above).
     }
 }
 ```
