@@ -55,7 +55,7 @@ program.action(function(compileIniPath){
         }
         t = path.dirname(compile_ini_path);
         tmp =  path.relative(t, dirCandidate);
-        tmp = t + '/' + destPathStart + '/' + tmp;
+        tmp = path.resolve(t, destPathStart, tmp);
         tmp = tmp.replace(/\/+/g, '/')
                  .replace(/(\/)$/, '');
         if (!applyMeta(meta, dirCandidate, tmp, processor, path.dirname(compile_ini_path))){
@@ -147,12 +147,15 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
         fs.unlinkSync(`${tmpDestPath}/__meta__`);
     }
     if (bD){
-        fs.renameSync(tmpDestPath, destPath);
+        //fs.renameSync(tmpDestPath, destPath);
         //fse.moveSync(tmpDestPath, destPath);//boris here: bug (пытается затереть содержимое целевой директории (надо не заместить её содержимое, а добавить))
                     //если и тогда будет пытаться переписать существующий файл(дир.-ю), должны аварийно прервать сборку с соответствующим сообщением
 
         //если такая директория уже есть, то перемещать туда содержимое
-        mergeDirs(tmpDestPath, destPath);
+        if (!mergeDirs(tmpDestPath, destPath)){
+            console.log('Произошёл конфликт при слиянии результатов компиляции разных директорий. Операция компиляции прервана.');
+            return false;
+        }
         for (const dirFuncId of meta.dir_proc){
             if (processor.dir.hasOwnProperty(dirFuncId)){
                 const tmpFunc = processor.dir[dirFuncId];
@@ -217,8 +220,71 @@ function copyDirContent(srcDirPath, destDirPath){
     }
 }
 function mergeDirs(p_fromDir, p_toDir){
-    var stack = [];
-    //boris here
+
+    var p1 = p_fromDir;
+    var p2 = p_toDir;
+    if (fs.existsSync(p2)){
+        const p2Stat = fs.statSync(p2);
+        if (!p2Stat.isDirectory()){
+            console.log(`Невозможно создать директорию '${p2}' - по этому адресу уже есть файл (не директория).`);
+            return false;
+        }
+    }
+    else{
+        fs.renameSync(p1, p2);
+        return true;
+    }
+
+    var dirList = [];
+    var list = [];
+
+    var stack = [p1];
+    while (stack.length){
+        const a = stack.pop();
+        const children = fs.readdirSync(a);
+        for (const i of children){
+            const childFullPath = `${a}/${i}`;
+            const stat = fs.statSync(childFullPath);
+            if (stat.isDirectory()){
+                stack.push(childFullPath);
+                dirList.push(path.relative(p1, childFullPath));
+            }
+            else{
+                list.push(path.relative(p1, childFullPath));
+            }
+        }
+    }
+    for (var i = 0 ; i < dirList.length ; i++){
+        const a = path.resolve(p2, dirList[i]);
+        if (fs.existsSync(a)){
+            const aStat = fs.statSync(a);
+            if (!aStat.isDirectory()){
+                console.log(`Невозможно создать директорию '${a}' - на этом месте уже есть файл (не директория).`);
+                return false;
+            }
+        }
+        else{
+            fs.mkdirSync(a);
+        }
+    }
+    while (list.length){
+        const a = list.pop();
+        const aTo = path.resolve(p2, a);
+        if (fs.existsSync(aTo)){
+            const aToStat = fs.fs.statSync(aTo);
+            const wordExists = aToStat.isDirectory() ? 'директория' : 'файл';
+            console.log(`Невозможно записать файл '${aTo}' - уже есть ${wordExists} с таким именем.`);
+            return false;
+        }
+        const aFrom = path.resolve(p1, a);
+        fs.renameSync(aFrom, aTo);
+    }
+    while (dirList.length){
+        const a = dirPost.pop();
+        fs.rmdirSync(path.resolve(p1, a));
+    }
+    fs.rmdirSync(p1);
+    return true;
 }
 program.parse(process.argv);
 
