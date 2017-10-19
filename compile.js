@@ -74,7 +74,20 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
             const hasTempl = file.source.hasOwnProperty('template');
             let retval = hasTempl ? fs.readFileSync(srcPath + '/'  + file.source.template, 'utf8') : '';
             for (const srcFile of file.source.list){
-                let tmp = fs.readFileSync(srcPath + '/'  + srcFile, 'utf8');
+                let tmp = destPath + '/'  + srcFile;
+                if (fs.existsSync(tmp)){
+                    tmp = fs.readFileSync(tmp, 'utf8');
+                    //мы использовали в качестве исходников результаты компиляции поддиректории - мы должны будем перед окончанием компиляции текущей директории удалить эту директорию с исходниками (это надо делать ДО того, как будут мёржиться временная директория в целевую)
+                }
+                else{
+                    tmp = srcPath + '/'  + srcFile;
+                    if (fs.existsSync(tmp))
+                        tmp = fs.readFileSync(tmp, 'utf8');
+                    else{
+                        console.log(`Не найден файл ${tmp}: операция компиляции прервана.`);
+                        return false;
+                    }
+                }
                 if (file.source.hasOwnProperty('types') && file.source.types.hasOwnProperty(srcFile)){
                     for (const filetype of file.source.types[srcFile]){
                         if (processor.file.hasOwnProperty(filetype)){
@@ -147,11 +160,6 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
         fs.unlinkSync(`${tmpDestPath}/__meta__`);
     }
     if (bD){
-        //fs.renameSync(tmpDestPath, destPath);
-        //fse.moveSync(tmpDestPath, destPath);//boris here: bug (пытается затереть содержимое целевой директории (надо не заместить её содержимое, а добавить))
-                    //если и тогда будет пытаться переписать существующий файл(дир.-ю), должны аварийно прервать сборку с соответствующим сообщением
-
-        //если такая директория уже есть, то перемещать туда содержимое
         if (!mergeDirs(tmpDestPath, destPath)){
             console.log('Произошёл конфликт при слиянии результатов компиляции разных директорий. Операция компиляции прервана.');
             return false;
