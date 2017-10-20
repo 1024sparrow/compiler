@@ -157,6 +157,17 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
         copyDirContent(srcPath, tmpDestPath);
         fs.unlinkSync(`${tmpDestPath}/__meta__`);
     }
+    if (meta.hasOwnProperty('remove')){
+        for (const i of meta.remove){
+            const t = path.resolve(destPath, i);
+            if (fs.existsSync)
+                fse.removeSync(t);
+            else{
+                console.log(`Невозможно удалить файл/директорию '${t}' - такого нет. Правила компиляции некорректны. Операция компиляции прервана.`);
+                return false;
+            }
+        }
+    }
     if (bD){
         if (!mergeDirs(tmpDestPath, destPath)){
             console.log('Произошёл конфликт при слиянии результатов компиляции разных директорий. Операция компиляции прервана.');
