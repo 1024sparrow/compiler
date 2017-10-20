@@ -1,0 +1,15 @@
+{
+    "files":[
+        {
+            "target": "compile.js",
+            "type":["no_comments", "minify", "shabang"],
+            "source":{
+                "template":"compile.js",
+                "list":["help.txt"],
+                "types":{
+                    "help.txt":["text"]
+                }
+            }
+        }
+    ]
+}

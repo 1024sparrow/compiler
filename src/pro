@@ -1,0 +1,23 @@
+var stripComments = require('strip-comments');
+module.exports = {
+    target: '../compiled',
+    file:{
+        text: function(s) {
+            return s
+                .replace(/"/g, '\\"')
+                .replace(/'/g, '\\\'')
+                .replace(/\n/g, '\\n')
+            ;
+        },
+        no_comments: function(s){
+            return stripComments(s);
+        },
+        //minify: 'scripts/minify.js',
+        minify:function(s){return s;},
+        shabang: function(s){
+            return  '#!/usr/bin/node\n\n' + s;
+        }
+    },
+    dir:{
+    }
+}

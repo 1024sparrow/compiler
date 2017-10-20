@@ -77,7 +77,7 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
                 let tmp = destPath + '/'  + srcFile;
                 if (fs.existsSync(tmp)){
                     tmp = fs.readFileSync(tmp, 'utf8');
-                    
+                    //мы использовали в качестве исходников результаты компиляции поддиректории - мы должны будем перед окончанием компиляции текущей директории удалить эту директорию с исходниками (это надо делать ДО того, как будут мёржиться временная директория в целевую)
                 }
                 else{
                     tmp = srcPath + '/'  + srcFile;
@@ -101,7 +101,7 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
                                             )
                                         );
                                 tmp = fs.readFileSync(tmpFile.name, 'utf8');
-                                
+                                //tmpFile.cleanupCallback();
                             }
                             else if (tmpType === 'function'){
                                 tmp = tmpFunc(tmp);
@@ -121,7 +121,7 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
                 else
                     retval += tmp;
             }
-            
+            //Применяем обработчики к получившемуся файлу
             if (file.hasOwnProperty('type')){
                 for (const filetype of file.type){
                     if (processor.file.hasOwnProperty(filetype)){
@@ -136,7 +136,7 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
                                     .toString()
                                     );
                             retval = fs.readFileSync(tmpFile.name, 'utf8');
-                            
+                            //tmpFile.cleanupCallback();
                         }
                         else if (tmpType === 'function'){
                             retval = tmpFunc(retval);
