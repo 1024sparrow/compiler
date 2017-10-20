@@ -1,0 +1,15 @@
+{
+    "files":[
+        {
+            "target": "body.js",
+            "type":["no_comments", "minify"],
+            "source":{
+                "template":"compile.js",
+                "list":["help.txt"],
+                "types":{
+                    "help.txt":["text"]
+                }
+            }
+        }
+    ]
+}

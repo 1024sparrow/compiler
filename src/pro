@@ -13,10 +13,7 @@ module.exports = {
             return stripComments(s);
         },
         //minify: 'scripts/minify.js',
-        minify:function(s){return s;},
-        shabang: function(s){
-            return  '#!/usr/bin/node\n\n' + s;
-        }
+        minify:function(s){return s;}
     },
     dir:{
     }
