@@ -30,8 +30,17 @@ program.action(function(compileIniPath){
     var dirStack = [];
     while (stack.length){
         var parent = stack.pop();
-        if (fs.existsSync(parent + '/__meta__'))
+        if (fs.existsSync(parent + '/__meta__')){
             dirStack.push(parent);
+            //если здесь есть '__meta__', и в нём нет 'files', НЕ кладём в стек детей (не спускаемся глубже)
+            //отсутствие 'files' означает, что в результаты будет копироваться папка целиком
+            var meta = JSON.parse(fs.readFileSync(tmp, 'utf8'));
+            if (!meta.hasOwnProperty('files')){
+               continue;
+            }
+        }
+
+
         var children = fs.readdirSync(parent);
         for (var i = 0 ; i < children.length ; i++){
             tmp = parent + '/' + children[i];
