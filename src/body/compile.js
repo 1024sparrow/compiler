@@ -29,8 +29,9 @@ program.action(function(compileIniPath){
     console.log(stack);
     var dirStack = [];
     while (stack.length){
+        tmp = parent + '/__meta__';
         var parent = stack.pop();
-        if (fs.existsSync(parent + '/__meta__')){
+        if (fs.existsSync(tmp)){
             dirStack.push(parent);
             //если здесь есть '__meta__', и в нём нет 'files', НЕ кладём в стек детей (не спускаемся глубже)
             //отсутствие 'files' означает, что в результаты будет копироваться папка целиком

@@ -42,8 +42,9 @@ program.action(function(compileIniPath){
     console.log(stack);
     var dirStack = [];
     while (stack.length){
+        tmp = parent + '/__meta__';
         var parent = stack.pop();
-        if (fs.existsSync(parent + '/__meta__')){
+        if (fs.existsSync(tmp)){
             dirStack.push(parent);
             
             
