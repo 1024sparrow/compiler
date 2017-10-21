@@ -123,11 +123,8 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
                             const tmpType = typeof tmpFunc;
                             if (tmpType === 'string'){
                                 fs.writeFileSync(tmpFile.name, tmp, 'utf8');
-                                console.log(
-                                        child_process.execSync(
-                                            path.resolve(processorDirPath, tmpFunc) + ' ' + tmpFile.name
-                                            )
-                                        );
+                                const tt = path.resolve(processorDirPath, tmpFunc) + ' ' + tmpFile.name;
+                                console.log(child_process.execSync(tt).toString('utf8'));
                                 tmp = fs.readFileSync(tmpFile.name, 'utf8');
                                 
                             }
@@ -161,7 +158,7 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
                                     child_process.execSync(
                                         path.resolve(processorDirPath, tmpFunc) + ' ' + tmpFile.name
                                         )
-                                    .toString()
+                                    .toString('utf8')
                                     );
                             retval = fs.readFileSync(tmpFile.name, 'utf8');
                             
