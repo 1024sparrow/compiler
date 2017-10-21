@@ -42,13 +42,19 @@ program.action(function(compileIniPath){
     console.log(stack);
     var dirStack = [];
     while (stack.length){
-        tmp = parent + '/__meta__';
         var parent = stack.pop();
+        tmp = parent + '/__meta__';
         if (fs.existsSync(tmp)){
             dirStack.push(parent);
             
             
-            var meta = JSON.parse(fs.readFileSync(tmp, 'utf8'));
+            try{
+                var meta = JSON.parse(fs.readFileSync(tmp, 'utf8'));
+            } catch(e) {
+                console.log('Файл \''+tmp+'\' не является корректным JSON-файлом. Операция компиляции прервана.');
+                console.log('Описание ошибки: '+e);
+                return; 
+            }
             if (!meta.hasOwnProperty('files')){
                continue;
             }
@@ -70,8 +76,9 @@ program.action(function(compileIniPath){
         tmp = dirCandidate+'/__meta__';
         try{
             var meta = JSON.parse(fs.readFileSync(tmp, 'utf8'));
-        } catch(err) {
+        } catch(e) {
             console.log('Файл \''+tmp+'\' не является корректным JSON-файлом. Операция компиляции прервана.');
+            console.log('Описание ошибки: '+e);
             break;
         }
         t = path.dirname(compile_ini_path);
