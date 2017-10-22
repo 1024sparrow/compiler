@@ -4,6 +4,10 @@ var fs = require('fs');
 var fse = require('fs-extra');
 var child_process = require('child_process');
 var tmpFile = require('tmp').fileSync();
+var StringDecoder = require('string_decoder').StringDecoder;
+var DECODER = new StringDecoder('utf8');
+
+
 program.version('1.0')
     .option('-i, --info', 'Показать информацию по предстоящей сборке');
 program.on('--help', function(){
@@ -111,7 +115,9 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
                             if (tmpType === 'string'){
                                 fs.writeFileSync(tmpFile.name, tmp, 'utf8');
                                 const tt = path.resolve(processorDirPath, tmpFunc) + ' ' + tmpFile.name;
-                                console.log(child_process.execSync(tt).toString('utf8'));
+                                const ou = child_process.execSync(tt, {encoding:'utf8', stdio:[0,1,2]});
+                                if (ou)
+                                    console.log(DECODER.write(ou));
                                 tmp = fs.readFileSync(tmpFile.name, 'utf8');
                                 //tmpFile.cleanupCallback();
                             }
@@ -141,12 +147,13 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
                         const tmpType = typeof tmpFunc;
                         if (tmpType === 'string'){
                             fs.writeFileSync(tmpFile.name, retval, 'utf8');
-                            console.log(
+                            const ou = 
                                     child_process.execSync(
-                                        path.resolve(processorDirPath, tmpFunc) + ' ' + tmpFile.name
-                                        )
-                                    .toString('utf8')
-                                    );
+                                        path.resolve(processorDirPath, tmpFunc) + ' ' + tmpFile.name,
+                                        {encoding:'utf8', stdio:[0,1,2]}
+                                        );
+                            if (ou)
+                                console.log(DECODER.write(ou));
                             retval = fs.readFileSync(tmpFile.name, 'utf8');
                             //tmpFile.cleanupCallback();
                         }
@@ -194,11 +201,12 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
                 const p1 = path.dirname(destPath);
                 const p2 = destPath.match(/([^\/])*$/g)[0];
                 if (tmpType === 'string'){
-                    console.log(
+                    const ou = 
                             child_process.execSync(
                                 `${path.resolve(processorDirPath, tmpFunc)} ${p1} ${p2}`
-                                )
-                            );
+                                );
+                    if (ou)
+                        console.log(DECODER.write(ou));
                 }
                 else if (tmpType === 'function'){
                     tmpFunc(p1, p2);
