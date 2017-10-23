@@ -65,7 +65,7 @@ program.action(function(compileIniPath){
     var destDir;
     while (dirStack.length){
         var dirCandidate = dirStack.pop();
-        console.log('\033[91mОбрабатываю директорию \''+dirCandidate+'\'\033[0m');//выводим красным цветом
+        console.log('\033[91mОбрабатываю директорию \''+path.relative(path.dirname(compileIniPath), dirCandidate)+'/\'\033[0m');//выводим красным цветом
         tmp = dirCandidate+'/__meta__';
         try{
             var meta = JSON.parse(fs.readFileSync(tmp, 'utf8'));
