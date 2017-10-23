@@ -29,8 +29,9 @@ program.action(function(compileIniPath){
     }
     const destPathStart = processor.target;
     fse.removeSync(path.dirname(compile_ini_path) + '/' + destPathStart);
-    var stack = [path.dirname(compile_ini_path)];
-    console.log(stack);
+    tmp = path.dirname(compile_ini_path);
+    console.log('\033[93mНачинаю сборку исходников в директории \''+tmp+'\'\033[0m');//выводим жёлтым цветом
+    var stack = [tmp];
     var dirStack = [];
     while (stack.length){
         var parent = stack.pop();
@@ -64,6 +65,7 @@ program.action(function(compileIniPath){
     var destDir;
     while (dirStack.length){
         var dirCandidate = dirStack.pop();
+        console.log('\033[91mОбрабатываю директорию \''+dirCandidate+'\'\033[0m');//выводим красным цветом
         tmp = dirCandidate+'/__meta__';
         try{
             var meta = JSON.parse(fs.readFileSync(tmp, 'utf8'));
@@ -79,9 +81,10 @@ program.action(function(compileIniPath){
                  .replace(/(\/)$/, '');
         if (!applyMeta(meta, dirCandidate, tmp, processor, path.dirname(compile_ini_path))){
             console.log('Операция компиляции прервана.');
-            break;
+            return;
         }
     }
+    console.log('\033[93mСборка успешно завершена\033[0m');//выводим жёлтым цветом
 });
 function applyMeta(meta, srcPath, destPath, processor, processorDirPath){ 
     const tmpDestPath = destPath + '.tmp';
