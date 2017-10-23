@@ -42,9 +42,9 @@ program.action(function(compileIniPath){
     }
     const destPathStart = processor.target;
     fse.removeSync(path.dirname(compile_ini_path) + '/' + destPathStart);
-    tmp = path.dirname(compile_ini_path);
-    console.log('\033[93mНачинаю сборку исходников в директории \''+tmp+'\'\033[0m');
-    var stack = [tmp];
+    var compileIniDir = path.dirname(compile_ini_path);
+    console.log('\033[93mНачинаю сборку исходников в директории \''+compileIniDir+'\'\033[0m');
+    var stack = [compileIniDir];
     var dirStack = [];
     while (stack.length){
         var parent = stack.pop();
@@ -60,9 +60,8 @@ program.action(function(compileIniPath){
                 console.log('Описание ошибки: '+e);
                 return; 
             }
-            if (!meta.hasOwnProperty('files')){
-               continue;
-            }
+            if ((!meta.hasOwnProperty('files')) && (tmp != path.resolve(compileIniDir, '__meta__')))
+                continue;
         }
 
 
@@ -78,7 +77,7 @@ program.action(function(compileIniPath){
     var destDir;
     while (dirStack.length){
         var dirCandidate = dirStack.pop();
-        console.log('\033[91mОбрабатываю директорию \''+path.relative(path.dirname(compileIniPath), dirCandidate)+'/\'\033[0m');
+        console.log('\033[91mОбрабатываю директорию \''+path.relative(compileIniDir, dirCandidate)+'/\'\033[0m');
         tmp = dirCandidate+'/__meta__';
         try{
             var meta = JSON.parse(fs.readFileSync(tmp, 'utf8'));
@@ -87,16 +86,17 @@ program.action(function(compileIniPath){
             console.log('Описание ошибки: '+e);
             break;
         }
-        t = path.dirname(compile_ini_path);
+        t = compileIniDir;
         tmp =  path.relative(t, dirCandidate);
         tmp = path.resolve(t, destPathStart, tmp);
         tmp = tmp.replace(/\/+/g, '/')
                  .replace(/(\/)$/, '');
-        if (!applyMeta(meta, dirCandidate, tmp, processor, path.dirname(compile_ini_path))){
+        if (!applyMeta(meta, dirCandidate, tmp, processor, compileIniDir)){
             console.log('Операция компиляции прервана.');
             return;
         }
     }
+    
     console.log('\033[93mСборка успешно завершена\033[0m');
 });
 function applyMeta(meta, srcPath, destPath, processor, processorDirPath){ 
@@ -107,7 +107,22 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
     if (bF){
         for (const file of meta.files){
             const hasTempl = file.source.hasOwnProperty('template');
-            let retval = hasTempl ? fs.readFileSync(srcPath + '/'  + file.source.template, 'utf8') : '';
+            let retval = '';
+            if (hasTempl){
+                const tmp = path.resolve(destPath, file.source.template);
+                if (fs.existsSync(tmp))
+                    retval = fs.readFileSync(tmp, 'utf8');
+                else{
+                    const t = path.resolve(srcPath, file.source.template);
+                    if (fs.existsSync(t)){
+                        retval = fs.readFileSync(t, 'utf8');
+                    }
+                    else{
+                        console.log(`Файл шаблона ${tmp} не найден. Операция компиляции прервана.`);
+                        return false;
+                    }
+                }
+            }
             for (const srcFile of file.source.list){
                 let tmp = destPath + '/'  + srcFile;
                 if (fs.existsSync(tmp)){
@@ -325,12 +340,7 @@ function mergeDirs(p_fromDir, p_toDir){
     while (list.length){
         const a = list.pop();
         const aTo = path.resolve(p2, a);
-        if (fs.existsSync(aTo)){
-            const aToStat = fs.fs.statSync(aTo);
-            const wordExists = aToStat.isDirectory() ? 'директория' : 'файл';
-            console.log(`Невозможно записать файл '${aTo}' - уже есть ${wordExists} с таким именем.`);
-            return false;
-        }
+        
         const aFrom = path.resolve(p1, a);
         fs.renameSync(aFrom, aTo);
     }
