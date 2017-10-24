@@ -206,8 +206,13 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
         }
     }
     else{
-        copyDirContent(srcPath, tmpDestPath);
-        fs.unlinkSync(`${tmpDestPath}/__meta__`);
+        if (srcPath === processorDirPath){
+            copyDirContent(destPath, tmpDestPath);
+        }
+        else{
+            copyDirContent(srcPath, tmpDestPath);
+            fs.unlinkSync(`${tmpDestPath}/__meta__`);
+        }
     }
     if (meta.hasOwnProperty('remove')){
         for (const i of meta.remove){
@@ -221,9 +226,14 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
         }
     }
     if (bD){
-        if (!mergeDirs(tmpDestPath, destPath)){
-            console.log('Произошёл конфликт при слиянии результатов компиляции разных директорий. Операция компиляции прервана.');
-            return false;
+        if (srcPath === processorDirPath){
+            fse.removeSync(tmpDestPath);
+        }
+        else {
+            if (!mergeDirs(tmpDestPath, destPath)){
+                console.log('Произошёл конфликт при слиянии результатов компиляции разных директорий. Операция компиляции прервана.');
+                return false;
+            }
         }
         for (const dirFuncId of meta.dir_proc){
             if (processor.dir.hasOwnProperty(dirFuncId)){
@@ -232,6 +242,7 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
                 const p1 = path.dirname(destPath);
                 const p2 = destPath.match(/([^\/])*$/g)[0];
                 if (tmpType === 'string'){
+                    console.log(`Выполняется скрипт '${path.resolve(processorDirPath, tmpFunc)} ${p1} ${p2}'.`);
                     const ou = 
                             child_process.execSync(
                                 `${path.resolve(processorDirPath, tmpFunc)} ${p1} ${p2}`
@@ -246,6 +257,9 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
                     console.log(`Для типа директории '${dirFuncId}' указан некорректный обработчик: опреация компиляции прервана.`);
                     return false;
                 }
+            }
+            else{
+                console.log(`Обработчик диретории '${dirFuncId}' не найден - директория '${destPath}' осталась необработанной.`);
             }
         }
     }
@@ -345,7 +359,7 @@ function mergeDirs(p_fromDir, p_toDir){
         fs.renameSync(aFrom, aTo);
     }
     while (dirList.length){
-        const a = dirPost.pop();
+        const a = dirList.pop();
         fs.rmdirSync(path.resolve(p1, a));
     }
     fs.rmdirSync(p1);
