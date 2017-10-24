@@ -226,14 +226,9 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
         }
     }
     if (bD){
-        if (srcPath === processorDirPath){
-            fse.removeSync(tmpDestPath);
-        }
-        else {
-            if (!mergeDirs(tmpDestPath, destPath)){
-                console.log('Произошёл конфликт при слиянии результатов компиляции разных директорий. Операция компиляции прервана.');
-                return false;
-            }
+        if (!mergeDirs(tmpDestPath, destPath)){
+            console.log('Произошёл конфликт при слиянии результатов компиляции разных директорий. Операция компиляции прервана.');
+            return false;
         }
         for (const dirFuncId of meta.dir_proc){
             if (processor.dir.hasOwnProperty(dirFuncId)){
