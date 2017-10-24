@@ -280,23 +280,7 @@ function createFullPath(fullPath){
     }
 }
 function copyDirContent(srcDirPath, destDirPath){
-    var stack = [[srcDirPath, destDirPath]];
-    while (stack.length){
-        const [parentSrc, parentDest] = stack.pop();
-        const children = fs.readdirSync(parentSrc);
-        for (const i of children){
-            const tmpSrc = `${parentSrc}/${i}`;
-            const tmpDest = `${parentDest}/${i}`;
-            const stat = fs.statSync(tmpSrc);
-            if (stat.isDirectory()){
-                fs.mkdirSync(tmpDest);
-                stack.push([tmpSrc, tmpDest]);
-            }
-            else{
-                fs.createReadStream(tmpSrc).pipe(fs.createWriteStream(tmpDest));
-            }
-        }
-    }
+    fse.copySync(srcDirPath, destDirPath, {dereference:true});
 }
 function mergeDirs(p_fromDir, p_toDir){
 
