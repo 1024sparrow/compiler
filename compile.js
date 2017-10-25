@@ -40,10 +40,38 @@ program.action(function(compileIniPath){
         console.log('Не найден файл \''+compileIniPath+'\' или он не является корректным  NodeJS-модулем.');
         return -1;
     }
+    var compileIniDir = path.dirname(compile_ini_path);
+    t = compile_ini_path;
+    fse.copySync(compileIniDir, compileIniDir + '.tmp');
+    compileIniDir += '.tmp';
+    compileIniPath = path.resolve(compileIniDir, path.basename(compileIniPath));
+    compile_ini_path = compileIniPath;
+    if (processor.hasOwnProperty('prebuild')){
+        let prebuild = processor.prebuild;
+        if (typeof prebuild !== 'object' || !(prebuild instanceof Array)){
+            console.log(`Файл проекта '${path.basename(t)}' имеет свойство 'prebuild', но это свойство не является массивом. Операция компиляции прервана.`);
+            return -1;
+        }
+        for (const i of prebuild){
+            if (typeof i === 'function'){
+                i(compileIniDir);
+            }
+            else if (typeof i === 'string'){
+                const tt = path.resolve(compileIniDir, i) + ' ' + compileIniDir;
+                const ou = child_process.execSync(tt, {encoding:'utf8', stdio:[0,1,2]});
+                if (ou)
+                    console.log(DECODER.write(ou));
+            }
+            else{
+                console.log('Некорректный тип обработчика в составе \'prebuild\'. Операция компиляции прервана.');
+                return -1;
+            }
+        }
+    }
+
     const destPathStart = processor.target;
     fse.removeSync(path.dirname(compile_ini_path) + '/' + destPathStart);
-    var compileIniDir = path.dirname(compile_ini_path);
-    console.log('\033[93mНачинаю сборку исходников в директории \''+compileIniDir+'\'\033[0m');
+    console.log('\033[93mНачинаю сборку исходников в директории \''+path.dirname(t)+'\'\033[0m');
     var stack = [compileIniDir];
     var dirStack = [];
     while (stack.length){
@@ -96,7 +124,7 @@ program.action(function(compileIniPath){
             return;
         }
     }
-    
+    fse.removeSync(compileIniDir);
     console.log('\033[93mСборка успешно завершена\033[0m');
 });
 function applyMeta(meta, srcPath, destPath, processor, processorDirPath){ 
@@ -267,6 +295,7 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
     }
     return true;
 }
+
 function createFullPath(fullPath){
     var tmp_list = fullPath.split('/');
     tmp_list.shift();
@@ -344,6 +373,6 @@ function mergeDirs(p_fromDir, p_toDir){
     fs.rmdirSync(p1);
     return true;
 }
-program.parse(process.argv);
 
+program.parse(process.argv);
 

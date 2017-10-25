@@ -1,0 +1,8 @@
+module.exports = {
+    target: '../result',
+    file:{
+    },
+    dir:{
+    },
+    prebuild: ['precompile.sh']
+}

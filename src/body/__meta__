@@ -5,7 +5,11 @@
             "type":["no_comments", "minify"],
             "source":{
                 "template":"compile.js",
-                "list":["help.txt"],
+                "list":[
+                    "help.txt",
+                    "applymeta.js",
+                    "utils.js"
+                ],
                 "types":{
                     "help.txt":["text"]
                 }
