@@ -1,15 +1,17 @@
 {
-  "name": "src",
+  "name": "compile",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "utility to build projects. Like 'make'. Supports hierarchical project structure.",
+  "main": "compile.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "VasilyevBP",
+  "license": "MIT",
   "dependencies": {
-    "strip-comments": "^0.4.4"
+    "commander": "^2.11.0",
+    "fs-extra": "^4.0.2",
+    "string_decoder": "^1.0.3",
+    "tmp": "0.0.33"
   }
 }

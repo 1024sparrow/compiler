@@ -1,4 +1,3 @@
-var stripComments = require('strip-comments');
 module.exports = {
     target: '../compiled',
     file:{
@@ -9,10 +8,6 @@ module.exports = {
                 .replace(/\n/g, '\\n')
             ;
         },
-        no_comments: function(s){
-            return stripComments(s);
-        },
-        //minify: 'scripts/minify.js',
         minify:function(s){return s;}
     },
     dir:{
