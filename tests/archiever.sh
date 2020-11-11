@@ -2,10 +2,22 @@
 
 for i in $*
 do
-	if [[ "-i" == "--help" ]]
+	if [[ "$i" == "--help" ]]
 	then
-		echo "$(basename($0)) [--help] [<PATH_TO_ARCHIEVE_OR_TO_DIR_WITH_FILES>]
+		tmp=$(basename "$0")
+		echo "$tmp [--help] [<PATH_TO_ARCHIEVE_OR_TO_DIR_WITH_FILES>]
 filename for archive file must be *.arch
+Пример содержимого файла *.arch:
+## Две решётки в начале строки - комментарий
+## Одна решётка - указание пути до файла
+# src/pro
+
+module.exports = {
+	target: '../compiled'
+}
+
+# src/__meta__
+asd
 "
 		exit 0
 	fi
