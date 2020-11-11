@@ -6,8 +6,9 @@ tmp=$(dirname "$0")
 pushd "$tmp" > /dev/null
 
 pushd src > /dev/null
-for i in 1
+for i in $(ls *.pro -1)
 do
+	i="${i:0:-4}"
 	../archiever.sh "$i".arch
 	mv "$i" "$i"_compiled
 	tmp=$(cat "$i".pro)
