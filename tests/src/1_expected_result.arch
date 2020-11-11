@@ -1,0 +1,8 @@
+# src/__meta__
+asd
+# src/pro
+
+module.exports = {
+	target: '../compiled'
+}
+
