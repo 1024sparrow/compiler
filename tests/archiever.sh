@@ -24,7 +24,7 @@ asd
 done
 
 function extract {
-	echo "EXTRACTING \"$1\" ..."
+	echo -n "EXTRACTING \"$1\" ... "
 	local filepath="$1"
 	local dirpath="$2"
 	#echo "==== $filepath $dirpath"
@@ -54,7 +54,7 @@ function extract {
 }
 
 function empack {
-	echo "EMPACKING \"$2\" ..."
+	echo -n "EMPACKING \"$2\" ... "
 	local filepath="$1"
 	local dirpath="$2"
 	local tmpDir
