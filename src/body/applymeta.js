@@ -65,7 +65,10 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
 					}
 				}
 				if (hasTempl){
-					retval = retval.replace(new RegExp(`{%% ${srcFile} %%}`, 'gm'), tmp);
+					const key = `{%% ${srcFile} %%}`;
+					for (let i = retval.indexOf(key) ; i >= 0 ; i = retval.indexOf(key, i + tmp.length + 1)){
+						retval = retval.slice(0, i) + tmp + retval.slice(i + key.length + 1);// boris here
+					}
 				}
 				else{
 					retval += tmp;
