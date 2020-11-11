@@ -2,6 +2,9 @@
 
 #./archiever.sh ../1.arch
 
+tmp=$(dirname "$0")
+pushd "$tmp" > /dev/null
+
 pushd src > /dev/null
 for i in 1
 do
@@ -21,4 +24,6 @@ do
 	rm "$i"_compiled.arch
 	rm -rf "$i"_compiled
 done
+popd > /dev/null
+
 popd > /dev/null
