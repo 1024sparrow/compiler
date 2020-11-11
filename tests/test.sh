@@ -19,9 +19,9 @@ do
 		then
 			echo "NOT THE SAME"
 			vimdiff "$i"_compiled.arch "$i"_expected_result.arch
+			rm "$i"_compiled.arch
 		fi
 	fi
-	rm "$i"_compiled.arch
 	rm -rf "$i"_compiled
 done
 popd > /dev/null
