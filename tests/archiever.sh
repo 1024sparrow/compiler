@@ -46,6 +46,7 @@ function extract {
 			then
 				mkdir -p "$tmp"
 			fi
+			echo -n "" > "$tmpFile"
 		else
 			echo "$line" >> "$tmpFile"
 		fi

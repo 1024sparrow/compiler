@@ -25,6 +25,8 @@ do
 			testsPassed=false
 		fi
 		rm "$i"_compiled.arch
+	else
+		testsPassed=false
 	fi
 	if ! $ok
 	then

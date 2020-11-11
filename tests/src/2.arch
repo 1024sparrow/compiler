@@ -1,0 +1,55 @@
+# src/__meta__
+{
+	"files":[
+		{
+			"target": "1.txt",
+			"source":{
+				"template": "t1",
+				"list": [
+					"1_1.txt",
+					"1_2.txt"
+				]
+			}
+		},
+		{
+			"target": "2.txt",
+			"source":{
+				"list": [
+					"2_1.txt",
+					"2_2.txt"
+				]
+			}
+		}
+	]
+}
+# src/1_1.txt
+1_1
+ 1_1
+  1_1
+ 1_1
+1_1
+# src/1_2.txt
+1_2
+ 1_2
+  1_2
+ 1_2
+1_2
+# src/2_1.txt
+2_1
+ 2_1
+  2_1
+ 2_1
+2_1
+# src/2_2.txt
+2_2
+ 2_2
+  2_2
+ 2_2
+2_2
+# src/t1
+{%% 1_1.txt %%}
+{%% 1_2.txt %%}
+# src/pro
+module.exports = {
+	target: '../compiled'
+}
