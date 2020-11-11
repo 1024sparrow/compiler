@@ -31,7 +31,7 @@ do
 		if [[ ! "${tmp1:0:32}" == "${tmp2:0:32}" ]]
 		then
 			echo "NOT THE SAME"
-			vimdiff "$i"_compiled.arch "$i"_expected_result.arch
+			vimdiff "$i"_expected_result.arch "$i"_compiled.arch
 			testsPassed=false
 		fi
 		rm "$i"_compiled.arch
