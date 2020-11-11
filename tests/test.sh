@@ -7,9 +7,19 @@ pushd "$tmp" > /dev/null
 
 pushd src > /dev/null
 testsPassed=true
-for i in $(ls *.pro -1)
+testList="$1"
+testListSet=true
+if [ -z "$testList" ]
+then
+	testList=$(ls *.pro -1)
+	testListSet=false
+fi
+for i in $testList
 do
-	i="${i:0:-4}"
+	if ! $testListSet
+	then
+		i="${i:0:-4}"
+	fi
 	../archiever.sh "$i".arch
 	mv "$i" "$i"_compiled
 	tmp=$(cat "$i".pro)
