@@ -45,7 +45,32 @@ function empack {
 	echo "EMPACKING..."
 	local filepath="$1"
 	local dirpath="$2"
-	echo "==== $filepath $dirpath"
+	local tmpDir
+	local tmpFile
+	local tmp
+	#echo "==== $filepath $dirpath"
+	while read line
+	do
+		#echo "\"$line\""
+		if [[ "$line" =~ .*:$ ]]
+		then
+			tmpDir="${line:0:-1}"
+			#echo "dir: \"$tmpDir\""
+		else
+			tmpFile="$tmpDir"/"$line"
+			if [ -f "$tmpFile" ]
+			then
+				#echo "file: \"$tmpFile\""
+				tmp=$((${#dirpath}+1))
+				echo "# ${tmpFile:$tmp}" >> "$filepath"
+				while IFS= read textLine
+				do
+					echo "$textLine" >> "$filepath"
+				done < "$tmpFile"
+			fi
+		fi
+	done < <(ls "$dirpath" -R -1)
+	echo "done"
 }
 
 arch="$1"
@@ -71,8 +96,8 @@ then
 	mode=2
 	dirpath="$1"
 	filepath="$1".arch
-	echo "Source file name: \"$filepath\""
-	echo "Target directory: \"$dirpath\""
+	#echo "Source file name: \"$filepath\""
+	#echo "Target directory: \"$dirpath\""
 	rm -f "$filepath"
 	empack "$filepath" "$dirpath"
 else
