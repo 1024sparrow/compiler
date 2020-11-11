@@ -64,10 +64,12 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
 						}
 					}
 				}
-				if (hasTempl)
+				if (hasTempl){
 					retval = retval.replace(new RegExp(`{%% ${srcFile} %%}`, 'gm'), tmp);
-				else
+				}
+				else{
 					retval += tmp;
+				}
 			}
 			//Применяем обработчики к получившемуся файлу
 			if (file.hasOwnProperty('type')){
