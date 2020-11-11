@@ -67,7 +67,31 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
 				if (hasTempl){
 					const key = `{%% ${srcFile} %%}`;
 					for (let i = retval.indexOf(key) ; i >= 0 ; i = retval.indexOf(key, i + tmp.length + 1)){
-						retval = retval.slice(0, i) + tmp + retval.slice(i + key.length + 1);// boris here
+						let indent = '';
+						let iIndent = i;
+						for (iIndent = i - 1 ; iIndent >= 0 ; --iIndent){
+							const tmpChar = retval[iIndent];
+							if ((tmpChar === ' ') || (tmpChar === '\t')){
+								indent = tmpChar + indent;
+							}
+							else{
+								break;
+							}
+						}
+						if (indent){
+							let isLast = true;
+							for (let i = tmp.length - 1 ; i >= 0; --i){
+								if (isLast){
+									isLast = false;
+								}
+								else{
+									if (tmp[i] == '\n'){
+										tmp = tmp.slice(0,i) + '\n' + indent + tmp.slice(i + 1);
+									}
+								}
+							}
+						}
+						retval = retval.slice(0, i) + tmp + retval.slice(i + key.length + 1);
 					}
 				}
 				else{
