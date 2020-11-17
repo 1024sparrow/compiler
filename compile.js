@@ -20,18 +20,75 @@ const tmpFile = require('tmp').fileSync();
 const StringDecoder = require('string_decoder').StringDecoder;
 const DECODER = new StringDecoder('utf8');
 
+var
+	iArg,
+	oArg,
+	/* state:
+	'' - initial state
+	'init' - initialize project
+	'add' - add .. (source or target?)
+	'add_source' - add source
+	'add_target'
+	'ready_compile'
+	'ready_add_source'
+	'ready_add_target'
+	*/
+	state = '',
+	proPath
+;
 
-program.version('1.0')
-	.option('-i, --info', 'Показать информацию по предстоящей сборке');
-program.on('--help', function(){
-	console.log('\nКомпилятор кода.\n================\nПрограмма принимает в качестве параметра путь к compile.ini.\nИмя файла \'compile.ini\' упоминается условно - вы можете произвольным образом назвать этот файл. Я, например, называю его как \'<название_проекта>.pro\'.\nВ папках с исходниками предполагается наличие файлов __meta__ (если такого файла в папке нет, то компилироваться папка не будет)\ncompile.ini:\n------------\nЗдесь определяются правила компиляции (строковый идентификатор и обрабатывающая функция(на JavaScript))\nОформляется как NodeJS-модуль:\nmodule.exports = {\n    target: \'compiled\', // <-- здесь будет формироваться результат компиляции\n    file_script_dir: \'\', //* относительный путь к директории, относительно которой будут указываться пути к скриптам для обработки файлов. Если свойство не указано - пути относительно директории, где находится файл compile.ini.\n    file: {\n        css:function(srcText){ // <-- типы файлов \'css\' будут обрабатываться вот этой функцией. Функция должна вернуть результат в виде строки.\n        }\n        // вместо функции можно указать путь к скрипту, который должен преобразовать данные в файле, полный путь к которому будет передан единственным параметром.\n    },\n    dir_script_dir: \'\', //* относительный путь к директории, относительно которой будут указываться пути к скриптам для обработки директорий. Если свойство не указано - пути относительно директории, где находится файл compile.ini.\n    dir: {\n        tab_app:function(dirPath, dirName){ // <--передаётся абсолютный путь до папки, содержащей целевую папку, и имя целевой папки. Этот обработчик будет применяться к директориям, помеченным как \'tab_app\'.\n        }\n        // вместо функции можно указать путь к скрипту, который должен преобразовать директорию. Скрипту передаются два параметра - такие, как передавались бы в фунцию (см. выше).\n    }\n}\n\n__meta__:\n---------\nЗдесь определяются цели компиляции, исходники и указываются идентификаторы обработчиков (из compile.ini).\nОформляется как JSON.\n{\n    files: [{..},{..}], //<-- Если это свойство есть, то собираем указанные файлы. Если этого свойства нет, то тупо копируем всю директорию.\n    dir_proc: [\'..\',\'..\'], //<-- Перечень обработчиков, которые необходимо применить к результирующей директории. Если нужно сохранить директорию (т.е. результаты компиляции будут в такой же папке, а не положены вместо неё), то свойство должно быть, пусть в массиве и не будет элементов.\n    remove: [] //<-- какие файлы и директории (от компиляции поддиректорий) надо удалить. Удалено будет перед запуском обработчиков из dir_proc\n}\n\nФормат описания правила компиляции файла (такой объект кладём в массив files):\n{\n    target: \'..\',//имя, не путь\n    type: [\'..\',\'..\'],//* обработчики файловые (текстовые идентификаторы из compile.ini), которые нужно применить (постобработка, после формирования из составляющих)\n    source:{\n        list: [\'1.js\', \'2.js\'],\n        template: \'..\', //* путь до файла с шаблоном\n        types:{\n            \'1.js\': [\'..\',\'..\'] // обработчики файловые (текстовые идентификаторы из compile.ini), которые нужно применить (предобработка, перед вставкой в целевой файл)\n        }\n    }\n}\n// * - необязательное свойство\n\nПри написании шаблона как ссылаться на файлы-исходники:\n{%% 1.js %%}\n1.js - имя файла (не забудьте его прописать в __meta__ !). Между \'%\' и именем файла обязательно должен быть один пробел.\n\nПростейший файл __meta__:\n-------------------------\n{\n    \"dir_proc\": []\n}\nЧто он делает - сохраняет директорию как есть. Если файл __meta__ отсутсвует или в нём нет свойства \'dir_proc\', такой папки в результатах компиляции не будет.\n\nСм. также:\n    - https://www.npmjs.com/package/node-minify\n    - var stripComments = require(\'strip-comments\');data = stripComments(data);\nАвтор: Васильев Б.П.\n');
-});
-program.on('--info', function(){
-	console.log('123');
-});
-program.arguments('<путь_до_compile.ini>');
-var processor; 
-program.action(function(compileIniPath){
+for (oArg of process.argv){
+	if (oArg === '--help'){
+		console.log('{% help.txt %%}'); // плохая подстановка (после обработки файла съедается закрывающая кавычка (которая определена в сасос шаблоне))
+		process.exit(0);
+	}
+}
+
+for (iArg = 2 ; iArg < process.argv.length ; ++iArg){
+	oArg = process.argv[iArg];
+	console.log('arg: ', oArg);
+
+	if (state === ''){
+		if (oArg === 'add'){
+			state = 'add';
+		}
+		else if (oArg === 'init'){
+			state = 'init';
+		}
+		else{
+			proPath = oArg;
+			state = 'ready_compile';
+		}
+	}
+	else if (state === 'init'){
+	}
+	else if (state === 'add'){
+		if (oArg === 'source'){
+			state = 'add_source';
+		}
+		else if (oArg === 'target'){
+			state = '';
+		}
+		else{
+			console.log('');
+		}
+	}
+	else if (state === 'add_source'){
+	}
+	else if (state === 'add_target'){
+	}
+	else if (state === 'ready_compile'){
+		console.log('Поддерживается сборка только одного проекта (лишние аргументы переданы)');
+		process.exit(1);
+	}
+	else if (state === 'ready_add_source'){
+	}
+	else if (state === 'ready_add_target'){
+	}
+}
+
+if (proPath){
+	(function(compileIniPath){
 	var tmp, t;
 	var compile_ini_path = path.resolve(path.resolve('./'), compileIniPath);
 	try{
@@ -126,7 +183,19 @@ program.action(function(compileIniPath){
 	}
 	fse.removeSync(compileIniDir);
 	console.log('\033[93mСборка успешно завершена\033[0m');//выводим жёлтым цветом
+} )(proPath);
+}
+
+
+program.version('1.0')
+	.option('-i, --info', 'Показать информацию по предстоящей сборке');
+program.on('--help', function(){
+	//console.log('{% help.txt %%}');
 });
+program.on('--info', function(){
+	console.log('123');
+});
+program.arguments('<путь_до_compile.ini>');
 function applyMeta(meta, srcPath, destPath, processor, processorDirPath){ 
 	const tmpDestPath = destPath + '.tmp';
 	createFullPath(tmpDestPath);
@@ -221,8 +290,6 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
 								}
 							}
 						}
-						console.log(`**: "${tmp}"`);
-						//retval = retval.slice(0, i) + tmp + retval.slice(i + key.length + 1);
 						retval = retval.slice(0, i) + tmp.slice(0, -1) + retval.slice(i + key.length);
 					}
 				}
@@ -327,7 +394,6 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
 	}
 	return true;
 }
-
 function createFullPath(fullPath){
 	var tmp_list = fullPath.split('/');
 	tmp_list.shift();
@@ -413,6 +479,4 @@ function mergeDirs(p_fromDir, p_toDir){
 	fs.rmdirSync(p1);
 	return true;
 }
-
 program.parse(process.argv);
-

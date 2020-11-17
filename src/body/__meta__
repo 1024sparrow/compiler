@@ -1,18 +1,19 @@
 {
-    "files":[
-        {
-            "target": "body.js",
-            "source":{
-                "template":"compile.js",
-                "list":[
-                    "help.txt",
-                    "applymeta.js",
-                    "utils.js"
-                ],
-                "types":{
-                    "help.txt":["text"]
-                }
-            }
-        }
-    ]
+	"files":[
+		{
+			"target": "body.js",
+			"source":{
+				"template":"compile.js",
+				"list":[
+					"help.txt",
+					"applymeta.js",
+					"utils.js",
+					"process.js"
+				],
+				"types":{
+					"help.txt":["text"]
+				}
+			}
+		}
+	]
 }

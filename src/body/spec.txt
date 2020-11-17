@@ -1,0 +1,8 @@
+Specification:
+<path_to_pro> - compile project
+
+init
+
+add
+	source
+	*target

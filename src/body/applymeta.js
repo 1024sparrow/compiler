@@ -92,7 +92,6 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
 								}
 							}
 						}
-						console.log(`**: "${tmp}"`);
 						retval = retval.slice(0, i) + tmp.slice(0, -1) + retval.slice(i + key.length);
 					}
 				}
