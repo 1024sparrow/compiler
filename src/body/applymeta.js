@@ -79,6 +79,7 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
 							}
 						}
 						if (indent){
+							console.log(`indent: "${indent}"`);
 							let isLast = true;
 							for (let i = tmp.length - 1 ; i >= 0; --i){
 								if (isLast){
@@ -91,7 +92,8 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
 								}
 							}
 						}
-						retval = retval.slice(0, i) + tmp + retval.slice(i + key.length + 1);
+						console.log(`**: "${tmp}"`);
+						retval = retval.slice(0, i) + tmp.slice(0, -1) + retval.slice(i + key.length);
 					}
 				}
 				else{

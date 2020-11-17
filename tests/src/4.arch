@@ -1,0 +1,26 @@
+# src/__meta__
+{
+	"files":[
+		{
+			"target": "1.txt",
+			"source":{
+				"template": "t",
+				"list": [
+					"help.txt"
+				]
+			}
+		}
+	]
+}
+# src/help.txt
+ q w e
+a s d
+  x c v
+# src/t
+console.log(`{%% help.txt %%}`);
+
+console.log(`{%% help.txt %%}`);
+# src/pro
+module.exports = {
+	target: '../compiled'
+}

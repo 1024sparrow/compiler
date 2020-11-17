@@ -1,0 +1,34 @@
+# 1.txt
+console.log(` q w e
+a s d
+  x c v`);
+
+console.log(` q w e
+a s d
+  x c v`);
+# src/help.txt
+ q w e
+a s d
+  x c v
+# src/__meta__
+{
+	"files":[
+		{
+			"target": "1.txt",
+			"source":{
+				"template": "t",
+				"list": [
+					"help.txt"
+				]
+			}
+		}
+	]
+}
+# src/pro
+module.exports = {
+	target: '../compiled'
+}
+# src/t
+console.log(`{%% help.txt %%}`);
+
+console.log(`{%% help.txt %%}`);

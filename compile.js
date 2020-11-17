@@ -4,10 +4,10 @@
  * Утилита для многоэтапной сборки проектов.
  * Utility for multistage project building.
  * 
- * Авторское право (c) 2017, Борис Васильев.
+ * Авторское право (c) 2017-2020, Борис Васильев.
  * Публикуется под лицензией MIT.
  *
- * Copyright (c) 2017, Boris Vasilyev.
+ * Copyright (c) 2017-2020, Boris Vasilyev.
  * Released under the MIT license.
  */
 
@@ -208,6 +208,7 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
 							}
 						}
 						if (indent){
+							console.log(`indent: "${indent}"`);
 							let isLast = true;
 							for (let i = tmp.length - 1 ; i >= 0; --i){
 								if (isLast){
@@ -220,7 +221,9 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
 								}
 							}
 						}
-						retval = retval.slice(0, i) + tmp + retval.slice(i + key.length + 1);
+						console.log(`**: "${tmp}"`);
+						//retval = retval.slice(0, i) + tmp + retval.slice(i + key.length + 1);
+						retval = retval.slice(0, i) + tmp.slice(0, -1) + retval.slice(i + key.length);
 					}
 				}
 				else{
