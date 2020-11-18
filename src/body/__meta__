@@ -8,7 +8,8 @@
 					"help.txt",
 					"applymeta.js",
 					"utils.js",
-					"process.js"
+					"process.js",
+					"master.js"
 				],
 				"types":{
 					"help.txt":["text"]

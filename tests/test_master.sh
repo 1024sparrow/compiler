@@ -5,7 +5,7 @@
 tmp=$(dirname "$0")
 pushd "$tmp" > /dev/null
 
-pushd src > /dev/null
+pushd master > /dev/null
 testsPassed=true
 testList="$1"
 testListSet=true
@@ -46,9 +46,9 @@ do
 done
 if $testsPassed
 then
-	echo "all tests passed successfully"
+	echo "all tests for master mode passed successfully"
 else
-	echo "tests not passed because of some errors"
+	echo "tests for master mode not passed because of some errors"
 fi
 popd > /dev/null
 

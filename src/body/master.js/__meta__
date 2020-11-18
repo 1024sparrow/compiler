@@ -1,0 +1,19 @@
+{
+	"files":[
+		{
+			"target": "master.js",
+			"source":{
+				"template": "t.js",
+				"list":[
+					"init.js",
+					"add_source.js",
+					"add_target.js",
+					"rm_source.js",
+					"rm_target.js",
+					"split.js",
+					"join.js"
+				]
+			}
+		}
+	]
+}
