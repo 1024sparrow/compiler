@@ -5,11 +5,7 @@ const child_process = require('child_process');
 const tmpFile = require('tmp').fileSync();
 const StringDecoder = require('string_decoder').StringDecoder;
 const DECODER = new StringDecoder('utf8');
-const readline = require('readline');
-const rl = readline.createInterface({
-	input: process.stdin,
-	output: process.stdout
-});
+const readlineSync = require('readline-sync');
 
 var
 	iArg,

@@ -9,8 +9,8 @@
   "author": "VasilyevBP",
   "license": "MIT",
   "dependencies": {
-    "commander": "^2.11.0",
     "fs-extra": "^4.0.2",
+    "readline-sync": "^1.4.10",
     "string_decoder": "^1.0.3",
     "tmp": "0.0.33"
   }
