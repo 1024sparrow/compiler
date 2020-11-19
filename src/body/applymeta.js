@@ -75,11 +75,13 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
 								indent = tmpChar + indent;
 							}
 							else{
+								if (tmpChar !== '\n'){
+									indent = '';
+								}
 								break;
 							}
 						}
 						if (indent){
-							console.log(`indent: "${indent}"`);
 							let isLast = true;
 							for (let i = tmp.length - 1 ; i >= 0; --i){
 								if (isLast){

@@ -39,402 +39,409 @@ var
 	//masterTree = {% master.js %%} // отступы: применять только если между предшествующими \n и <space> нет букв
 	masterTree =
 	{ // all functions take one parameter - ifHelp. If passed nonull value then just print help for this function.
-		init: function(p_helpNeeded){
-	 	if (p_helpNeeded){
-	 		console.log(`
-	 `);
-	 		process.exit(0);
-	 	}
-	 `
-	 project/
-	   src/
-	     pro
-	     __meta__
-	    ...
-	   compiled/
-	 
-	 
-	 project/
-	   some_compiled_1
-	   some_compiled_2
-	   src/
-	     pro
-	     __meta__
-	     ...
-	 `;
-	 	if (fs.existsSync('pro')){
-	 		console.log('File \"pro\" already exists');
-	 		process.exit(1);
-	 	}
-	 	if (fs.existsSync('__meta__')){
-	 		console.log('File \"__meta__\" already exists');
-	 		process.exit(1);
-	 	}
-	 	/*readline.emitKeypressEvents(process.stdin);
-	 	process.stdin.setRawMode(true);
-	 	process.stdout.write('');
-	 	var compiledDirPath = '';
-	 	var cursorPosition = 0;
-	 	process.stdin.on('keypress', function(p_str, p_key){
-	 		//console.log(p_key);
-	 		if (p_key.name === 'backspace'){
-	 			compiledDirPath = compiledDirPath.slice(0, -1);
-	 			process.stdout.clearLine();
-	 			process.stdout.cursorTo(0);
-	 			process.stdout.write(compiledDirPath);
-	 		}
-	 		else if (p_key.name === 'left'){
-	 			if (cursorPosition > 0){
-	 				--cursorPosition;
-	 				process.stdout.cursorTo(cursorPosition);
-	 			}
-	 		}
-	 		else if (p_key.name === 'right'){
-	 			if (cursorPosition < (compiledDirPath.length - 1)){
-	 				++cursorPosition;
-	 				process.stdout.cursorTo(cursorPosition);
-	 			}
-	 		}
-	 		else if (p_key.name === 'return'){
-	 			console.log('result: ', compiledDirPath);
-	 			compiledDirPath = '';
-	 			cursorPosition = 0;
-	 		}
-	 		else{
-	 			if ('qwertyuiopasdfghjklzxcvbnm./\()-_=QWERTYUIOPASDFGHJKLZXCVBNM '.indexOf(p_str) >= 0){
-	 				compiledDirPath = compiledDirPath.slice(0, cursorPosition) + p_str + compiledDirPath.slice(cursorPosition);
-	 				++cursorPosition;
-	 				process.stdout.clearLine();
-	 				process.stdout.cursorTo(0);
-	 				process.stdout.write(compiledDirPath);
-	 				process.stdout.cursorTo(cursorPosition);
-	 			}
-	 			else{
-	 				process.stdout.clearLine();
-	 				process.stdout.cursorTo(0);
-	 				process.stdout.write(compiledDirPath);
-	 			}
-	 		}
-	 	});*/
-	 	console.log('Внимание! Результаты сборки не могут находиться в одной директории с исходниками, так что при задании директории для результатов сборки используйте вышележащие директории');
-	 	var compiledDirPath = readlineSync.question('В какую директорию писать результаты сборки [по умолчанию: ../compiled]: ') || '../compiled';
-	 	var pro = `module.exports = {
-	 	target: '${compiledDirPath}',
-	 	file:{},
-	 	dir:{}
-	 }`;
-	 	var meta = {};
-	 
-	 	var targets = [];
-	 	console.log('Вводите имена файлов, которые должны быть в результате сборки (каждый файл на отдельной строке, окончание ввода - дважды "Enter")');
-	 	var tmp;
-	 	while (tmp = readlineSync.question('> ')){
-	 		targets.push(tmp);
-	 	}
-	 	if (targets.length > 0){
-	 		meta.files = [];
-	 		for (const o of targets){
-	 			meta.files.push({target: o, source:{template: o, list:[]}});
-	 			fs.writeFileSync(o, '', 'utf8');
-	 		}
-	 	}
-	 
-	 
-	 	var ifDirNeeded = readlineSync.keyInYN('Нужно ли сохранить файлы в отдельной директории (если нет, то все файлы и поддиретории из диретории сборки будут перемещены на уровень выше, а сама диретория сборки будет удалена): [Y/n] ');
-	 	if (ifDirNeeded){
-	 		meta.dir_proc = [];
-	 	}
-	 
-	 
-	 	fs.writeFileSync('pro', pro, 'utf8');
-	 	fs.writeFileSync('__meta__', JSON.stringify(meta, undefined, '\t'), 'utf8');
-	 },
+		init:
+			function(p_helpNeeded){
+				if (p_helpNeeded){
+					console.log(`
+			`);
+					process.exit(0);
+				}
+			`
+			project/
+			  src/
+			    pro
+			    __meta__
+			   ...
+			  compiled/
+			
+			
+			project/
+			  some_compiled_1
+			  some_compiled_2
+			  src/
+			    pro
+			    __meta__
+			    ...
+			`;
+				if (fs.existsSync('pro')){
+					console.log('File \"pro\" already exists');
+					process.exit(1);
+				}
+				if (fs.existsSync('__meta__')){
+					console.log('File \"__meta__\" already exists');
+					process.exit(1);
+				}
+				/*readline.emitKeypressEvents(process.stdin);
+				process.stdin.setRawMode(true);
+				process.stdout.write('');
+				var compiledDirPath = '';
+				var cursorPosition = 0;
+				process.stdin.on('keypress', function(p_str, p_key){
+					//console.log(p_key);
+					if (p_key.name === 'backspace'){
+						compiledDirPath = compiledDirPath.slice(0, -1);
+						process.stdout.clearLine();
+						process.stdout.cursorTo(0);
+						process.stdout.write(compiledDirPath);
+					}
+					else if (p_key.name === 'left'){
+						if (cursorPosition > 0){
+							--cursorPosition;
+							process.stdout.cursorTo(cursorPosition);
+						}
+					}
+					else if (p_key.name === 'right'){
+						if (cursorPosition < (compiledDirPath.length - 1)){
+							++cursorPosition;
+							process.stdout.cursorTo(cursorPosition);
+						}
+					}
+					else if (p_key.name === 'return'){
+						console.log('result: ', compiledDirPath);
+						compiledDirPath = '';
+						cursorPosition = 0;
+					}
+					else{
+						if ('qwertyuiopasdfghjklzxcvbnm./\()-_=QWERTYUIOPASDFGHJKLZXCVBNM '.indexOf(p_str) >= 0){
+							compiledDirPath = compiledDirPath.slice(0, cursorPosition) + p_str + compiledDirPath.slice(cursorPosition);
+							++cursorPosition;
+							process.stdout.clearLine();
+							process.stdout.cursorTo(0);
+							process.stdout.write(compiledDirPath);
+							process.stdout.cursorTo(cursorPosition);
+						}
+						else{
+							process.stdout.clearLine();
+							process.stdout.cursorTo(0);
+							process.stdout.write(compiledDirPath);
+						}
+					}
+				});*/
+				console.log('Внимание! Результаты сборки не могут находиться в одной директории с исходниками, так что при задании директории для результатов сборки используйте вышележащие директории');
+				var compiledDirPath = readlineSync.question('В какую директорию писать результаты сборки [по умолчанию: ../compiled]: ') || '../compiled';
+				var pro = `module.exports = {
+				target: '${compiledDirPath}',
+				file:{},
+				dir:{}
+			}`;
+				var meta = {};
+			
+				var targets = [];
+				console.log('Вводите имена файлов, которые должны быть в результате сборки (каждый файл на отдельной строке, окончание ввода - дважды "Enter")');
+				var tmp;
+				while (tmp = readlineSync.question('> ')){
+					targets.push(tmp);
+				}
+				if (targets.length > 0){
+					meta.files = [];
+					for (const o of targets){
+						meta.files.push({target: o, source:{template: o, list:[]}});
+						fs.writeFileSync(o, '', 'utf8');
+					}
+				}
+			
+			
+				var ifDirNeeded = readlineSync.keyInYN('Нужно ли сохранить файлы в отдельной директории (если нет, то все файлы и поддиретории из диретории сборки будут перемещены на уровень выше, а сама диретория сборки будет удалена): [Y/n] ');
+				if (ifDirNeeded){
+					meta.dir_proc = [];
+				}
+			
+			
+				fs.writeFileSync('pro', pro, 'utf8');
+				fs.writeFileSync('__meta__', JSON.stringify(meta, undefined, '\t'), 'utf8');
+			},
 		add:{
 			children:{
-				source: function(p_helpNeeded){
-	 	if (p_helpNeeded){
-	 		console.log(`
-	 `);
-	 		process.exit(0);
-	 	}
-	 	if (!fs.existsSync('__meta__')){
-	 		console.log('File \"__meta__\" not found');
-	 		process.exit(1);
-	 	}
-	 	try{
-	 		var meta = JSON.parse(fs.readFileSync('__meta__', 'utf8'));
-	 	} catch(e) {
-	 		console.log('Файл __meta__ не является корректным JSON-файлом. Операция добавления цели сборки прервана.');
-	 		console.log('Описание ошибки: '+e);
-	 		process.exit(1);
-	 	}
-	 	if (!meta.hasOwnProperty('files')){
-	 		meta.files = [];
-	 	}
-	 	let variants = [];
-	 	for (const oTarget of meta.files){
-	 		variants.push(oTarget.target);
-	 	}
-	 	let targetIndex = readlineSync.keyInSelect(variants, 'Выберите цель сборки, к которой надо добавить исходник: ');
-	 	if (targetIndex < 0){
-	 		process.exit(1);
-	 	}
-	 	var tmp = meta.files[targetIndex];
-	 	if (meta.files[targetIndex].source.list.length === 0){
-	 		console.log(`В данный момент для сборки цели "${tmp.target}" не используются какие-либо исходники`);
-	 	}
-	 	else{
-	 		console.log(`В данный момент для сборки цели "${tmp.target}" используются следующие исходники:`);
-	 		for (const oSrc of meta.files[targetIndex].source.list){
-	 			console.log(oSrc);
-	 		}
-	 	}
-	 	var sources = [];
-	 	console.log('Вводите имена файлов, которые должны быть в результате сборки (каждый файл на отдельной строке, окончание ввода - дважды "Enter")');
-	 	var tmp;
-	 	while (tmp = readlineSync.question('> ')){
-	 		sources.push(tmp);
-	 	}
-	 	for (const oSourceCand of sources){
-	 		if (!fs.existsSync(oSourceCand)){
-	 			fs.writeFileSync(oSourceCand, '', 'utf8');
-	 		}
-	 		meta.files[targetIndex].source.list.push(oSourceCand);
-	 	}
-	 	fs.writeFileSync('__meta__', JSON.stringify(meta, undefined, '\t'), 'utf8');
-	 },
-				target: function(p_helpNeeded){
-	 	if (p_helpNeeded){
-	 		console.log(`
-	 `);
-	 		process.exit(0);
-	 	}
-	 	if (!fs.existsSync('__meta__')){
-	 		console.log('File \"__meta__\" not found');
-	 		process.exit(1);
-	 	}
-	 	try{
-	 		var meta = JSON.parse(fs.readFileSync('__meta__', 'utf8'));
-	 	} catch(e) {
-	 		console.log('Файл __meta__ не является корректным JSON-файлом. Операция добавления цели сборки прервана.');
-	 		console.log('Описание ошибки: '+e);
-	 		process.exit(1);
-	 	}
-	 	if (!meta.hasOwnProperty('files')){
-	 		meta.files = [];
-	 	}
-	 	var targetCand = readlineSync.question('Какой файл добавить к списку целей сборки: ');
-	 	if (!targetCand){
-	 		process.exit(1);
-	 	}
-	 	for (const o of meta.files){
-	 		if (o.target === targetCand){
-	 			console.log(`Target "${targetCand}" already exists`);
-	 			process.exit(1);
-	 		}
-	 	}
-	 	for (const oTarget of meta.files){
-	 		if (oTarget.source.list.indexOf(targetCand) >= 0){
-	 			console.log(`File "${targetCand} already use as source in target "${oTarget.target}""`);
-	 			process.exit(1);
-	 		}
-	 		if (oTarget.source.template === targetCand){
-	 			console.log(`File "${targetCand} already use as template in target "${oTarget.target}""`);
-	 			process.exit(1);
-	 		}
-	 	}
-	 	if (!fs.existsSync(targetCand)){
-	 		fs.writeFileSync(targetCand, '', 'utf8');
-	 	}
-	 	meta.files.push({
-	 		target: targetCand,
-	 		source:{
-	 			template: targetCand,
-	 			list: []
-	 		}
-	 	});
-	 	fs.writeFileSync('__meta__', JSON.stringify(meta, undefined, '\t'), 'utf8');
-	 }
+				source:
+					function(p_helpNeeded){
+						if (p_helpNeeded){
+							console.log(`
+					`);
+							process.exit(0);
+						}
+						if (!fs.existsSync('__meta__')){
+							console.log('File \"__meta__\" not found');
+							process.exit(1);
+						}
+						try{
+							var meta = JSON.parse(fs.readFileSync('__meta__', 'utf8'));
+						} catch(e) {
+							console.log('Файл __meta__ не является корректным JSON-файлом. Операция добавления цели сборки прервана.');
+							console.log('Описание ошибки: '+e);
+							process.exit(1);
+						}
+						if (!meta.hasOwnProperty('files')){
+							meta.files = [];
+						}
+						let variants = [];
+						for (const oTarget of meta.files){
+							variants.push(oTarget.target);
+						}
+						let targetIndex = readlineSync.keyInSelect(variants, 'Выберите цель сборки, к которой надо добавить исходник: ');
+						if (targetIndex < 0){
+							process.exit(1);
+						}
+						var tmp = meta.files[targetIndex];
+						if (meta.files[targetIndex].source.list.length === 0){
+							console.log(`В данный момент для сборки цели "${tmp.target}" не используются какие-либо исходники`);
+						}
+						else{
+							console.log(`В данный момент для сборки цели "${tmp.target}" используются следующие исходники:`);
+							for (const oSrc of meta.files[targetIndex].source.list){
+								console.log(oSrc);
+							}
+						}
+						var sources = [];
+						console.log('Вводите имена файлов, которые должны быть в результате сборки (каждый файл на отдельной строке, окончание ввода - дважды "Enter")');
+						var tmp;
+						while (tmp = readlineSync.question('> ')){
+							sources.push(tmp);
+						}
+						for (const oSourceCand of sources){
+							if (!fs.existsSync(oSourceCand)){
+								fs.writeFileSync(oSourceCand, '', 'utf8');
+							}
+							meta.files[targetIndex].source.list.push(oSourceCand);
+						}
+						fs.writeFileSync('__meta__', JSON.stringify(meta, undefined, '\t'), 'utf8');
+					},
+				target:
+					function(p_helpNeeded){
+						if (p_helpNeeded){
+							console.log(`
+					`);
+							process.exit(0);
+						}
+						if (!fs.existsSync('__meta__')){
+							console.log('File \"__meta__\" not found');
+							process.exit(1);
+						}
+						try{
+							var meta = JSON.parse(fs.readFileSync('__meta__', 'utf8'));
+						} catch(e) {
+							console.log('Файл __meta__ не является корректным JSON-файлом. Операция добавления цели сборки прервана.');
+							console.log('Описание ошибки: '+e);
+							process.exit(1);
+						}
+						if (!meta.hasOwnProperty('files')){
+							meta.files = [];
+						}
+						var targetCand = readlineSync.question('Какой файл добавить к списку целей сборки: ');
+						if (!targetCand){
+							process.exit(1);
+						}
+						for (const o of meta.files){
+							if (o.target === targetCand){
+								console.log(`Target "${targetCand}" already exists`);
+								process.exit(1);
+							}
+						}
+						for (const oTarget of meta.files){
+							if (oTarget.source.list.indexOf(targetCand) >= 0){
+								console.log(`File "${targetCand} already use as source in target "${oTarget.target}""`);
+								process.exit(1);
+							}
+							if (oTarget.source.template === targetCand){
+								console.log(`File "${targetCand} already use as template in target "${oTarget.target}""`);
+								process.exit(1);
+							}
+						}
+						if (!fs.existsSync(targetCand)){
+							fs.writeFileSync(targetCand, '', 'utf8');
+						}
+						meta.files.push({
+							target: targetCand,
+							source:{
+								template: targetCand,
+								list: []
+							}
+						});
+						fs.writeFileSync('__meta__', JSON.stringify(meta, undefined, '\t'), 'utf8');
+					}
 			}
 		},
 		rm:{
 			children:{
-				source: function(p_helpNeeded){
-	 	if (p_helpNeeded){
-	 		console.log(`
-	 `);
-	 		process.exit(0);
-	 	}
-	 	if (!fs.existsSync('__meta__')){
-	 		console.log('File \"__meta__\" not found');
-	 		process.exit(1);
-	 	}
-	 	try{
-	 		var meta = JSON.parse(fs.readFileSync('__meta__', 'utf8'));
-	 	} catch(e) {
-	 		console.log('Файл __meta__ не является корректным JSON-файлом. Операция добавления цели сборки прервана.');
-	 		console.log('Описание ошибки: '+e);
-	 		process.exit(1);
-	 	}
-	 	if ((meta.files || []).length === 0){
-	 		console.log('Целей сборки нет: удалять нечего');
-	 		if (meta.hasOwnProperty('files')){
-	 			meta.files = undefined;
-	 			fs.writeFileSync('__meta__', JSON.stringify(meta, undefined, '\t'), 'utf8');
-	 		}
-	 		process.exit(0);
-	 	}
-	 	let variants = [];
-	 	for (const oTarget of meta.files){
-	 		variants.push(oTarget.target);
-	 	}
-	 	let targetIndex = readlineSync.keyInSelect(variants, 'Выберите цель сборки, от которой надо открепить исходники: ');
-	 	if (targetIndex < 0){
-	 		process.exit(1);
-	 	}
-	 	var tmp = meta.files[targetIndex];
-	 	if (meta.files[targetIndex].source.list.length === 0){
-	 		console.log(`В данный момент для сборки цели "${tmp.target}" не используются какие-либо исходники`);
-	 		process.exit(1);
-	 	}
-	 	var sourceIndexToRemove;
-	 	do{
-	 		if (sourceIndexToRemove !== undefined){
-	 			tmp.source.list.splice(sourceIndexToRemove, 1);
-	 		}
-	 		if (tmp.source.list.length === 0){
-	 			console.log(`Удалены все исходники из цели сбрки "${tmp.target}"`);
-	 			break;
-	 		}
-	 		variants = []
-	 		for (const oSrc of tmp.source.list){
-	 			variants.push(oSrc);
-	 		}
-	 		console.log(`В данный момент для сборки цели "${tmp.target}" используются следующие исходники:`);
-	 	} while ((sourceIndexToRemove = readlineSync.keyInSelect(variants, 'Что удалить: '))>= 0);
-	 	fs.writeFileSync('__meta__', JSON.stringify(meta, undefined, '\t'), 'utf8');
-	 },
-				target: function(p_helpNeeded){
-	 	if (p_helpNeeded){
-	 		console.log(`
-	 `);
-	 		process.exit(0);
-	 	}
-	 	if (!fs.existsSync('__meta__')){
-	 		console.log('File \"__meta__\" not found');
-	 		process.exit(1);
-	 	}
-	 	try{
-	 		var meta = JSON.parse(fs.readFileSync('__meta__', 'utf8'));
-	 	} catch(e) {
-	 		console.log('Файл __meta__ не является корректным JSON-файлом. Операция добавления цели сборки прервана.');
-	 		console.log('Описание ошибки: '+e);
-	 		process.exit(1);
-	 	}
-	 	if ((meta.files || []).length === 0){
-	 		console.log('Целей сборки нет: удалять нечего');
-	 		if (meta.hasOwnProperty('files')){
-	 			meta.files = undefined;
-	 			fs.writeFileSync('__meta__', JSON.stringify(meta, undefined, '\t'), 'utf8');
-	 		}
-	 		process.exit(0);
-	 	}
-	 	let variants = [];
-	 	for (const oTarget of meta.files){
-	 		variants.push(oTarget.target);
-	 	}
-	 	let indexToRemove = readlineSync.keyInSelect(variants, 'Выберите, что необходимо удалить: ');
-	 	if (indexToRemove < 0){
-	 		process.exit(1);
-	 	}
-	 	meta.files.splice(indexToRemove, 1);
-	 	if (meta.files.length === 0){
-	 		meta.files = undefined;
-	 	}
-	 	fs.writeFileSync('__meta__', JSON.stringify(meta, undefined, '\t'), 'utf8');
-	 	process.exit(0);
-	 }
+				source:
+					function(p_helpNeeded){
+						if (p_helpNeeded){
+							console.log(`
+					`);
+							process.exit(0);
+						}
+						if (!fs.existsSync('__meta__')){
+							console.log('File \"__meta__\" not found');
+							process.exit(1);
+						}
+						try{
+							var meta = JSON.parse(fs.readFileSync('__meta__', 'utf8'));
+						} catch(e) {
+							console.log('Файл __meta__ не является корректным JSON-файлом. Операция добавления цели сборки прервана.');
+							console.log('Описание ошибки: '+e);
+							process.exit(1);
+						}
+						if ((meta.files || []).length === 0){
+							console.log('Целей сборки нет: удалять нечего');
+							if (meta.hasOwnProperty('files')){
+								meta.files = undefined;
+								fs.writeFileSync('__meta__', JSON.stringify(meta, undefined, '\t'), 'utf8');
+							}
+							process.exit(0);
+						}
+						let variants = [];
+						for (const oTarget of meta.files){
+							variants.push(oTarget.target);
+						}
+						let targetIndex = readlineSync.keyInSelect(variants, 'Выберите цель сборки, от которой надо открепить исходники: ');
+						if (targetIndex < 0){
+							process.exit(1);
+						}
+						var tmp = meta.files[targetIndex];
+						if (meta.files[targetIndex].source.list.length === 0){
+							console.log(`В данный момент для сборки цели "${tmp.target}" не используются какие-либо исходники`);
+							process.exit(1);
+						}
+						var sourceIndexToRemove;
+						do{
+							if (sourceIndexToRemove !== undefined){
+								tmp.source.list.splice(sourceIndexToRemove, 1);
+							}
+							if (tmp.source.list.length === 0){
+								console.log(`Удалены все исходники из цели сбрки "${tmp.target}"`);
+								break;
+							}
+							variants = []
+							for (const oSrc of tmp.source.list){
+								variants.push(oSrc);
+							}
+							console.log(`В данный момент для сборки цели "${tmp.target}" используются следующие исходники:`);
+						} while ((sourceIndexToRemove = readlineSync.keyInSelect(variants, 'Что удалить: '))>= 0);
+						fs.writeFileSync('__meta__', JSON.stringify(meta, undefined, '\t'), 'utf8');
+					},
+				target:
+					function(p_helpNeeded){
+						if (p_helpNeeded){
+							console.log(`
+					`);
+							process.exit(0);
+						}
+						if (!fs.existsSync('__meta__')){
+							console.log('File \"__meta__\" not found');
+							process.exit(1);
+						}
+						try{
+							var meta = JSON.parse(fs.readFileSync('__meta__', 'utf8'));
+						} catch(e) {
+							console.log('Файл __meta__ не является корректным JSON-файлом. Операция добавления цели сборки прервана.');
+							console.log('Описание ошибки: '+e);
+							process.exit(1);
+						}
+						if ((meta.files || []).length === 0){
+							console.log('Целей сборки нет: удалять нечего');
+							if (meta.hasOwnProperty('files')){
+								meta.files = undefined;
+								fs.writeFileSync('__meta__', JSON.stringify(meta, undefined, '\t'), 'utf8');
+							}
+							process.exit(0);
+						}
+						let variants = [];
+						for (const oTarget of meta.files){
+							variants.push(oTarget.target);
+						}
+						let indexToRemove = readlineSync.keyInSelect(variants, 'Выберите, что необходимо удалить: ');
+						if (indexToRemove < 0){
+							process.exit(1);
+						}
+						meta.files.splice(indexToRemove, 1);
+						if (meta.files.length === 0){
+							meta.files = undefined;
+						}
+						fs.writeFileSync('__meta__', JSON.stringify(meta, undefined, '\t'), 'utf8');
+						process.exit(0);
+					}
 			}
 		},
-		split: function(p_helpNeeded){
-	 	if (p_helpNeeded){
-	 		console.log(`
-	 `);
-	 		process.exit(0);
-	 	}
-	 `
-	 hello.js - as target and as template
-	 
-	 Split template or source (FILE!):
-	 =================================
-	 hello.js/
-	 	__meta__
-	 	hello.js # template
-	 	hello_func1.js
-	 	hello_func2.js
-	 `
-	 	var srcCand = readlineSync.question('Какой файл надо разбить: ');
-	 	if (!srcCand){
-	 		process.exit(1);
-	 	}
-	 	var content;
-	 	try{
-	 		content = fs.readFileSync(srcCand, 'utf8')
-	 	}
-	 	catch (e){
-	 		console.log(`Не удалось открыть на чтение файл "${srcCand}"`);
-	 		console.log('Описание ошибки: '+e);
-	 		process.exit(1);
-	 	}
-	 	fs.unlinkSync(srcCand);
-	 	fs.mkdirSync(srcCand);
-	 	fs.writeFileSync(path.resolve(srcCand, srcCand), content, 'utf8');
-	 	var meta = {
-	 		files:[
-	 			{
-	 				target: srcCand,
-	 				source:{
-	 					template:srcCand,
-	 					list:[]
-	 				}
-	 			}
-	 		]
-	 	};
-	 	fs.writeFileSync(path.resolve(srcCand, '__meta__'), JSON.stringify(meta, undefined, '\t'), 'utf8');
-	 },
-		join: function(p_helpNeeded){
-	 	if (p_helpNeeded){
-	 		console.log(`
-	 `);
-	 		process.exit(0);
-	 	}
-	 	var srcCand = readlineSync.question('Какой файл надо собрать: ');
-	 	var tmp;
-	 	var meta; // of initial splitted version
-	 	if (!srcCand){
-	 		process.exit(1);
-	 	}
-	 	try{
-	 		meta = fs.readFileSync(path.resolve(srcCand, '__meta__'), 'utf8')
-	 	}
-	 	catch (e){
-	 		tmp = path.resolve(srcCand, '__meta__');
-	 		console.log(`Не удалось открыть на чтение файл "${tmp}"`);
-	 		console.log('Описание ошибки: '+e);
-	 		process.exit(1);
-	 	}
-	 	var pro = `
-	 module.exports = {
-	 	target: '../compiled',
-	 	file:{},
-	 	dir:{}
-	 }`;
-	 	fs.writeFileSync(path.resolve(srcCand, 'pro'), pro, 'utf8');
-	 	tmp = srcCand + '.tmp_join';
-	 	fs.renameSync(srcCand, tmp);
-	 	applyPro(path.resolve(tmp, 'pro'));
-	 	fse.removeSync(tmp);
-	 }
+		split:
+			function(p_helpNeeded){
+				if (p_helpNeeded){
+					console.log(`
+			`);
+					process.exit(0);
+				}
+			`
+			hello.js - as target and as template
+			
+			Split template or source (FILE!):
+			=================================
+			hello.js/
+				__meta__
+				hello.js # template
+				hello_func1.js
+				hello_func2.js
+			`
+				var srcCand = readlineSync.question('Какой файл надо разбить: ');
+				if (!srcCand){
+					process.exit(1);
+				}
+				var content;
+				try{
+					content = fs.readFileSync(srcCand, 'utf8')
+				}
+				catch (e){
+					console.log(`Не удалось открыть на чтение файл "${srcCand}"`);
+					console.log('Описание ошибки: '+e);
+					process.exit(1);
+				}
+				fs.unlinkSync(srcCand);
+				fs.mkdirSync(srcCand);
+				fs.writeFileSync(path.resolve(srcCand, srcCand), content, 'utf8');
+				var meta = {
+					files:[
+						{
+							target: srcCand,
+							source:{
+								template:srcCand,
+								list:[]
+							}
+						}
+					]
+				};
+				fs.writeFileSync(path.resolve(srcCand, '__meta__'), JSON.stringify(meta, undefined, '\t'), 'utf8');
+			},
+		join:
+			function(p_helpNeeded){
+				if (p_helpNeeded){
+					console.log(`
+			`);
+					process.exit(0);
+				}
+				var srcCand = readlineSync.question('Какой файл надо собрать: ');
+				var tmp;
+				var meta; // of initial splitted version
+				if (!srcCand){
+					process.exit(1);
+				}
+				try{
+					meta = fs.readFileSync(path.resolve(srcCand, '__meta__'), 'utf8')
+				}
+				catch (e){
+					tmp = path.resolve(srcCand, '__meta__');
+					console.log(`Не удалось открыть на чтение файл "${tmp}"`);
+					console.log('Описание ошибки: '+e);
+					process.exit(1);
+				}
+				var pro = `
+			module.exports = {
+				target: '../compiled',
+				file:{},
+				dir:{}
+			}`;
+				fs.writeFileSync(path.resolve(srcCand, 'pro'), pro, 'utf8');
+				tmp = srcCand + '.tmp_join';
+				fs.renameSync(srcCand, tmp);
+				applyPro(path.resolve(tmp, 'pro'));
+				fse.removeSync(tmp);
+			}
 		/*
 	Допустим, мы создали файл (исходник), разбили его в попдиректорию. Затем добавили туда (в ту поддиреторию) ещё одну цель. Что теперь с этим делать? JOIN-ить не понятно как:
 	РЕШЕНИЕ: собираем несколько файлов (ровно так, как прописано __meta__ файле той диретории, которую мы схлопываем)
@@ -446,101 +453,101 @@ var
 	processor,
 	command = '',
 	applyPro = function(compileIniPath){
- 	var tmp, t;
- 	var compile_ini_path = path.resolve(path.resolve('./'), compileIniPath);
- 	try{
- 		var processor = require(compile_ini_path);
- 	} catch (err) {
- 		console.log('Не найден файл \''+compileIniPath+'\' или он не является корректным  NodeJS-модулем.');
- 		process.exit(1);
- 	}
- 	var compileIniDir = path.dirname(compile_ini_path);
- 	t = compile_ini_path;
- 	fse.copySync(compileIniDir, compileIniDir + '.tmp');
- 	compileIniDir += '.tmp';
- 	compileIniPath = path.resolve(compileIniDir, path.basename(compileIniPath));
- 	compile_ini_path = compileIniPath;
- 	if (processor.hasOwnProperty('prebuild')){
- 		let prebuild = processor.prebuild;
- 		if (typeof prebuild !== 'object' || !(prebuild instanceof Array)){
- 			console.log(`Файл проекта '${path.basename(t)}' имеет свойство 'prebuild', но это свойство не является массивом. Операция компиляции прервана.`);
- 			process.exit(1);
- 		}
- 		for (const i of prebuild){
- 			if (typeof i === 'function'){
- 				i(compileIniDir);
- 			}
- 			else if (typeof i === 'string'){
- 				const tt = path.resolve(compileIniDir, i) + ' ' + compileIniDir;
- 				const ou = child_process.execSync(tt, {encoding:'utf8', stdio:[0,1,2]});
- 				if (ou)
- 					console.log(DECODER.write(ou));
- 			}
- 			else{
- 				console.log('Некорректный тип обработчика в составе \'prebuild\'. Операция компиляции прервана.');
- 				process.exit(1);
- 			}
- 		}
- 	}
- 
- 	const destPathStart = processor.target;
- 	fse.removeSync(path.dirname(compile_ini_path) + '/' + destPathStart);//boris return: тут я, видимо, пьяный был...
- 	console.log('\033[93mНачинаю сборку исходников в директории \''+path.dirname(t)+'\'\033[0m');//выводим жёлтым цветом
- 	var stack = [compileIniDir];
- 	var dirStack = [];
- 	while (stack.length){
- 		var parent = stack.pop();
- 		tmp = parent + '/__meta__';
- 		if (fs.existsSync(tmp)){
- 			dirStack.push(parent);
- 			//если здесь есть '__meta__', и в нём нет 'files', НЕ кладём в стек детей (не спускаемся глубже)
- 			//отсутствие 'files' означает, что в результаты будет копироваться папка целиком
- 			try{
- 				var meta = JSON.parse(fs.readFileSync(tmp, 'utf8'));
- 			} catch(e) {
- 				console.log('Файл \''+tmp+'\' не является корректным JSON-файлом. Операция компиляции прервана.');
- 				console.log('Описание ошибки: '+e);
- 				process.exit(1);
- 			}
- 			if ((!meta.hasOwnProperty('files')) && (tmp != path.resolve(compileIniDir, '__meta__')))
- 				continue;
- 		}
- 
- 
- 		var children = fs.readdirSync(parent);
- 		for (var i = 0 ; i < children.length ; i++){
- 			tmp = parent + '/' + children[i];
- 			var stat = fs.statSync(tmp);
- 			if (stat.isDirectory()){
- 				stack.push(tmp);
- 			}
- 		}
- 	}
- 	var destDir;
- 	while (dirStack.length){
- 		var dirCandidate = dirStack.pop();
- 		console.log('\033[91mОбрабатываю директорию \''+path.relative(compileIniDir, dirCandidate)+'/\'\033[0m');//выводим красным цветом
- 		tmp = dirCandidate+'/__meta__';
- 		try{
- 			var meta = JSON.parse(fs.readFileSync(tmp, 'utf8'));
- 		} catch(e) {
- 			console.log('Файл \''+tmp+'\' не является корректным JSON-файлом. Операция компиляции прервана.');
- 			console.log('Описание ошибки: '+e);
- 			break;
- 		}
- 		t = compileIniDir;
- 		tmp =  path.relative(t, dirCandidate);
- 		tmp = path.resolve(t, destPathStart, tmp);
- 		tmp = tmp.replace(/\/+/g, '/')
- 				 .replace(/(\/)$/, '');
- 		if (!applyMeta(meta, dirCandidate, tmp, processor, compileIniDir)){
- 			console.log('Операция компиляции прервана.');
- 			process.exit(1);
- 		}
- 	}
- 	fse.removeSync(compileIniDir);
- 	console.log('\033[93mСборка успешно завершена\033[0m');//выводим жёлтым цветом
- }
+	var tmp, t;
+	var compile_ini_path = path.resolve(path.resolve('./'), compileIniPath);
+	try{
+		var processor = require(compile_ini_path);
+	} catch (err) {
+		console.log('Не найден файл \''+compileIniPath+'\' или он не является корректным  NodeJS-модулем.');
+		process.exit(1);
+	}
+	var compileIniDir = path.dirname(compile_ini_path);
+	t = compile_ini_path;
+	fse.copySync(compileIniDir, compileIniDir + '.tmp');
+	compileIniDir += '.tmp';
+	compileIniPath = path.resolve(compileIniDir, path.basename(compileIniPath));
+	compile_ini_path = compileIniPath;
+	if (processor.hasOwnProperty('prebuild')){
+		let prebuild = processor.prebuild;
+		if (typeof prebuild !== 'object' || !(prebuild instanceof Array)){
+			console.log(`Файл проекта '${path.basename(t)}' имеет свойство 'prebuild', но это свойство не является массивом. Операция компиляции прервана.`);
+			process.exit(1);
+		}
+		for (const i of prebuild){
+			if (typeof i === 'function'){
+				i(compileIniDir);
+			}
+			else if (typeof i === 'string'){
+				const tt = path.resolve(compileIniDir, i) + ' ' + compileIniDir;
+				const ou = child_process.execSync(tt, {encoding:'utf8', stdio:[0,1,2]});
+				if (ou)
+					console.log(DECODER.write(ou));
+			}
+			else{
+				console.log('Некорректный тип обработчика в составе \'prebuild\'. Операция компиляции прервана.');
+				process.exit(1);
+			}
+		}
+	}
+
+	const destPathStart = processor.target;
+	fse.removeSync(path.dirname(compile_ini_path) + '/' + destPathStart);//boris return: тут я, видимо, пьяный был...
+	console.log('\033[93mНачинаю сборку исходников в директории \''+path.dirname(t)+'\'\033[0m');//выводим жёлтым цветом
+	var stack = [compileIniDir];
+	var dirStack = [];
+	while (stack.length){
+		var parent = stack.pop();
+		tmp = parent + '/__meta__';
+		if (fs.existsSync(tmp)){
+			dirStack.push(parent);
+			//если здесь есть '__meta__', и в нём нет 'files', НЕ кладём в стек детей (не спускаемся глубже)
+			//отсутствие 'files' означает, что в результаты будет копироваться папка целиком
+			try{
+				var meta = JSON.parse(fs.readFileSync(tmp, 'utf8'));
+			} catch(e) {
+				console.log('Файл \''+tmp+'\' не является корректным JSON-файлом. Операция компиляции прервана.');
+				console.log('Описание ошибки: '+e);
+				process.exit(1);
+			}
+			if ((!meta.hasOwnProperty('files')) && (tmp != path.resolve(compileIniDir, '__meta__')))
+				continue;
+		}
+
+
+		var children = fs.readdirSync(parent);
+		for (var i = 0 ; i < children.length ; i++){
+			tmp = parent + '/' + children[i];
+			var stat = fs.statSync(tmp);
+			if (stat.isDirectory()){
+				stack.push(tmp);
+			}
+		}
+	}
+	var destDir;
+	while (dirStack.length){
+		var dirCandidate = dirStack.pop();
+		console.log('\033[91mОбрабатываю директорию \''+path.relative(compileIniDir, dirCandidate)+'/\'\033[0m');//выводим красным цветом
+		tmp = dirCandidate+'/__meta__';
+		try{
+			var meta = JSON.parse(fs.readFileSync(tmp, 'utf8'));
+		} catch(e) {
+			console.log('Файл \''+tmp+'\' не является корректным JSON-файлом. Операция компиляции прервана.');
+			console.log('Описание ошибки: '+e);
+			break;
+		}
+		t = compileIniDir;
+		tmp =  path.relative(t, dirCandidate);
+		tmp = path.resolve(t, destPathStart, tmp);
+		tmp = tmp.replace(/\/+/g, '/')
+				 .replace(/(\/)$/, '');
+		if (!applyMeta(meta, dirCandidate, tmp, processor, compileIniDir)){
+			console.log('Операция компиляции прервана.');
+			process.exit(1);
+		}
+	}
+	fse.removeSync(compileIniDir);
+	console.log('\033[93mСборка успешно завершена\033[0m');//выводим жёлтым цветом
+}
 ;
 
 for (oArg of process.argv){
@@ -549,11 +556,11 @@ for (oArg of process.argv){
 		process.exit(0);
 	}
 	else if (oArg === '--version'){
-		console.log('1.1');
+		console.log('1.2');
 		process.exit(0);
 	}
 	else if (oArg === '--changelog'){
-		console.log('1.1 - добавлен режим мастера (\"init\", \"add target\", \"rm target\", \"add source\", \"rm source\", \"join\", \"split\")\ ');
+		console.log('1.2 - issue 1, bug 1.1. Поправлены отступы вставляемого из другого файла теста.\n1.1 - добавлен режим мастера (\"init\", \"add target\", \"rm target\", \"add source\", \"rm source\", \"join\", \"split\")\ ');
 		process.exit(0);
 	}
 }
@@ -707,11 +714,13 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
 								indent = tmpChar + indent;
 							}
 							else{
+								if (tmpChar !== '\n'){
+									indent = '';
+								}
 								break;
 							}
 						}
 						if (indent){
-							console.log(`indent: "${indent}"`);
 							let isLast = true;
 							for (let i = tmp.length - 1 ; i >= 0; --i){
 								if (isLast){

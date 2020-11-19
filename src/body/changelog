@@ -1,1 +1,2 @@
+1.2 - issue 1, bug 1.1. Поправлены отступы вставляемого из другого файла теста.
 1.1 - добавлен режим мастера ("init", "add target", "rm target", "add source", "rm source", "join", "split")
