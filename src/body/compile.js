@@ -27,7 +27,8 @@ var
 	masterTree =
 	{%% master.js %%},
 	processor,
-	command = ''
+	command = '',
+	applyPro = {%% process.js %%}
 ;
 
 for (oArg of process.argv){
@@ -36,7 +37,6 @@ for (oArg of process.argv){
 		process.exit(0);
 	}
 }
-
 
 for (iArg = 2 ; iArg < process.argv.length ; ++iArg){
 	oArg = process.argv[iArg];
@@ -87,7 +87,7 @@ if (state == 0){
 	process.exit(1);
 }
 if (state === 1){
-	({%% process.js %%})(proPath);
+	processor(proPath);
 }
 else {
 	if (state === 3){

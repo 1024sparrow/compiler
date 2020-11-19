@@ -14,4 +14,15 @@ function(){
 		console.log('Описание ошибки: '+e);
 		process.exit(1);
 	}
+	var pro = `
+module.exports = {
+	target: '../compiled',
+	file:{},
+	dir:{}
+}`;
+	fs.writeFileSync(path.resolve(srcCand, 'pro'), pro, 'utf8');
+	tmp = srcCand + '.tmp_join';
+	fs.renameSync(srcCand, tmp);
+	applyPro(path.resolve(tmp, 'pro'));
+	fse.removeSync(tmp);
 }

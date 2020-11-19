@@ -34,11 +34,11 @@ var
 	'ready_add_source'
 	'ready_add_target'
 	*/
-	state = 0, // 0 - initial, 1 - compile(core), 2 - master mode
+	state = 0, // 0 - initial, 1 - compile(core), 2 - master mode, 3 - help for master mode
 	proPath,
 	//masterTree = {% master.js %%} // отступы: применять только если между предшествующими \n и <space> нет букв
 	masterTree =
-	{
+	{ // all functions take one parameter - ifHelp. If passed nonull value then just print help for this function.
 		init: function(){
 	 `
 	 project/
@@ -344,6 +344,9 @@ var
 	 	hello_func2.js
 	 `
 	 	var srcCand = readlineSync.question('Какой файл надо разбить: ');
+	 	if (!srcCand){
+	 		process.exit(1);
+	 	}
 	 	var content;
 	 	try{
 	 		content = fs.readFileSync(srcCand, 'utf8')
@@ -370,10 +373,138 @@ var
 	 	fs.writeFileSync(path.resolve(srcCand, '__meta__'), JSON.stringify(meta, undefined, '\t'), 'utf8');
 	 },
 		join: function(){
-	 }
+	 	var srcCand = readlineSync.question('Какой файл надо собрать: ');
+	 	var tmp;
+	 	var meta; // of initial splitted version
+	 	if (!srcCand){
+	 		process.exit(1);
+	 	}
+	 	try{
+	 		meta = fs.readFileSync(path.resolve(srcCand, '__meta__'), 'utf8')
+	 	}
+	 	catch (e){
+	 		tmp = path.resolve(srcCand, '__meta__');
+	 		console.log(`Не удалось открыть на чтение файл "${tmp}"`);
+	 		console.log('Описание ошибки: '+e);
+	 		process.exit(1);
+	 	}
+	 	var pro = `
+	 module.exports = {
+	 	target: '../compiled',
+	 	file:{},
+	 	dir:{}
+	 }`;
+	 	fs.writeFileSync(path.resolve(srcCand, 'pro'), pro, 'utf8');
+	 	tmp = srcCand + '.tmp_join';
+	 	fs.renameSync(srcCand, tmp);
+	 	applyPro(path.resolve(tmp, 'pro'));
+	 	fse.removeSync(tmp);
+	 },
+		// mkdir // вынести цель в отдельную диреторию (когда в одном __meta__ несколько целей)
+		/*
+	Допустим, мы создали файл (исходник), разбили его в попдиректорию. Затем добавили туда (в ту поддиреторию) ещё одну цель. Что теперь с этим делать? JOIN-ить не понятно как:
+	РЕШЕНИЕ: собираем несколько файлов (ровно так, как прописано __meta__ файле той диретории, которую мы схлопываем)
+		*/
+		help: true
 	},
 	processor,
-	command = ''
+	command = '',
+	applyPro = function(compileIniPath){
+ 	var tmp, t;
+ 	var compile_ini_path = path.resolve(path.resolve('./'), compileIniPath);
+ 	try{
+ 		var processor = require(compile_ini_path);
+ 	} catch (err) {
+ 		console.log('Не найден файл \''+compileIniPath+'\' или он не является корректным  NodeJS-модулем.');
+ 		process.exit(1);
+ 	}
+ 	var compileIniDir = path.dirname(compile_ini_path);
+ 	t = compile_ini_path;
+ 	fse.copySync(compileIniDir, compileIniDir + '.tmp');
+ 	compileIniDir += '.tmp';
+ 	compileIniPath = path.resolve(compileIniDir, path.basename(compileIniPath));
+ 	compile_ini_path = compileIniPath;
+ 	if (processor.hasOwnProperty('prebuild')){
+ 		let prebuild = processor.prebuild;
+ 		if (typeof prebuild !== 'object' || !(prebuild instanceof Array)){
+ 			console.log(`Файл проекта '${path.basename(t)}' имеет свойство 'prebuild', но это свойство не является массивом. Операция компиляции прервана.`);
+ 			process.exit(1);
+ 		}
+ 		for (const i of prebuild){
+ 			if (typeof i === 'function'){
+ 				i(compileIniDir);
+ 			}
+ 			else if (typeof i === 'string'){
+ 				const tt = path.resolve(compileIniDir, i) + ' ' + compileIniDir;
+ 				const ou = child_process.execSync(tt, {encoding:'utf8', stdio:[0,1,2]});
+ 				if (ou)
+ 					console.log(DECODER.write(ou));
+ 			}
+ 			else{
+ 				console.log('Некорректный тип обработчика в составе \'prebuild\'. Операция компиляции прервана.');
+ 				process.exit(1);
+ 			}
+ 		}
+ 	}
+ 
+ 	const destPathStart = processor.target;
+ 	fse.removeSync(path.dirname(compile_ini_path) + '/' + destPathStart);//boris return: тут я, видимо, пьяный был...
+ 	console.log('\033[93mНачинаю сборку исходников в директории \''+path.dirname(t)+'\'\033[0m');//выводим жёлтым цветом
+ 	var stack = [compileIniDir];
+ 	var dirStack = [];
+ 	while (stack.length){
+ 		var parent = stack.pop();
+ 		tmp = parent + '/__meta__';
+ 		if (fs.existsSync(tmp)){
+ 			dirStack.push(parent);
+ 			//если здесь есть '__meta__', и в нём нет 'files', НЕ кладём в стек детей (не спускаемся глубже)
+ 			//отсутствие 'files' означает, что в результаты будет копироваться папка целиком
+ 			try{
+ 				var meta = JSON.parse(fs.readFileSync(tmp, 'utf8'));
+ 			} catch(e) {
+ 				console.log('Файл \''+tmp+'\' не является корректным JSON-файлом. Операция компиляции прервана.');
+ 				console.log('Описание ошибки: '+e);
+ 				process.exit(1);
+ 			}
+ 			if ((!meta.hasOwnProperty('files')) && (tmp != path.resolve(compileIniDir, '__meta__')))
+ 				continue;
+ 		}
+ 
+ 
+ 		var children = fs.readdirSync(parent);
+ 		for (var i = 0 ; i < children.length ; i++){
+ 			tmp = parent + '/' + children[i];
+ 			var stat = fs.statSync(tmp);
+ 			if (stat.isDirectory()){
+ 				stack.push(tmp);
+ 			}
+ 		}
+ 	}
+ 	var destDir;
+ 	while (dirStack.length){
+ 		var dirCandidate = dirStack.pop();
+ 		console.log('\033[91mОбрабатываю директорию \''+path.relative(compileIniDir, dirCandidate)+'/\'\033[0m');//выводим красным цветом
+ 		tmp = dirCandidate+'/__meta__';
+ 		try{
+ 			var meta = JSON.parse(fs.readFileSync(tmp, 'utf8'));
+ 		} catch(e) {
+ 			console.log('Файл \''+tmp+'\' не является корректным JSON-файлом. Операция компиляции прервана.');
+ 			console.log('Описание ошибки: '+e);
+ 			break;
+ 		}
+ 		t = compileIniDir;
+ 		tmp =  path.relative(t, dirCandidate);
+ 		tmp = path.resolve(t, destPathStart, tmp);
+ 		tmp = tmp.replace(/\/+/g, '/')
+ 				 .replace(/(\/)$/, '');
+ 		if (!applyMeta(meta, dirCandidate, tmp, processor, compileIniDir)){
+ 			console.log('Операция компиляции прервана.');
+ 			process.exit(1);
+ 		}
+ 	}
+ 	fse.removeSync(compileIniDir);
+ 	console.log('\033[93mСборка успешно завершена\033[0m');//выводим жёлтым цветом
+ }
 ;
 
 for (oArg of process.argv){
@@ -383,12 +514,16 @@ for (oArg of process.argv){
 	}
 }
 
-
 for (iArg = 2 ; iArg < process.argv.length ; ++iArg){
 	oArg = process.argv[iArg];
 	//console.log('arg: ', oArg);
 	if (state === 0){
-		if (masterTree.hasOwnProperty(oArg)){
+		if (oArg === 'help'){
+			command += 'help';
+			state = 3;
+			continue;
+		}
+		else if (masterTree.hasOwnProperty(oArg)){
 			state = 2;
 		}
 		else{
@@ -401,7 +536,7 @@ for (iArg = 2 ; iArg < process.argv.length ; ++iArg){
 		process.exit(1);
 	}
 
-	if (state == 2){
+	if (state === 2 || state === 3){
 		if (masterTree[oArg]){
 			masterTree = masterTree[oArg].children || masterTree[oArg];
 		}
@@ -425,111 +560,30 @@ for (iArg = 2 ; iArg < process.argv.length ; ++iArg){
 
 if (state == 0){
 	console.log('no arguments is not valid. See help.');
+	process.exit(1);
 }
-else if (state === 1){
-	(function(compileIniPath){
-	var tmp, t;
-	var compile_ini_path = path.resolve(path.resolve('./'), compileIniPath);
-	try{
-		var processor = require(compile_ini_path);
-	} catch (err) {
-		console.log('Не найден файл \''+compileIniPath+'\' или он не является корректным  NodeJS-модулем.');
-		process.exit(1);
-	}
-	var compileIniDir = path.dirname(compile_ini_path);
-	t = compile_ini_path;
-	fse.copySync(compileIniDir, compileIniDir + '.tmp');
-	compileIniDir += '.tmp';
-	compileIniPath = path.resolve(compileIniDir, path.basename(compileIniPath));
-	compile_ini_path = compileIniPath;
-	if (processor.hasOwnProperty('prebuild')){
-		let prebuild = processor.prebuild;
-		if (typeof prebuild !== 'object' || !(prebuild instanceof Array)){
-			console.log(`Файл проекта '${path.basename(t)}' имеет свойство 'prebuild', но это свойство не является массивом. Операция компиляции прервана.`);
-			process.exit(1);
-		}
-		for (const i of prebuild){
-			if (typeof i === 'function'){
-				i(compileIniDir);
-			}
-			else if (typeof i === 'string'){
-				const tt = path.resolve(compileIniDir, i) + ' ' + compileIniDir;
-				const ou = child_process.execSync(tt, {encoding:'utf8', stdio:[0,1,2]});
-				if (ou)
-					console.log(DECODER.write(ou));
-			}
-			else{
-				console.log('Некорректный тип обработчика в составе \'prebuild\'. Операция компиляции прервана.');
-				process.exit(1);
-			}
-		}
-	}
-
-	const destPathStart = processor.target;
-	fse.removeSync(path.dirname(compile_ini_path) + '/' + destPathStart);//boris return: тут я, видимо, пьяный был...
-	console.log('\033[93mНачинаю сборку исходников в директории \''+path.dirname(t)+'\'\033[0m');//выводим жёлтым цветом
-	var stack = [compileIniDir];
-	var dirStack = [];
-	while (stack.length){
-		var parent = stack.pop();
-		tmp = parent + '/__meta__';
-		if (fs.existsSync(tmp)){
-			dirStack.push(parent);
-			//если здесь есть '__meta__', и в нём нет 'files', НЕ кладём в стек детей (не спускаемся глубже)
-			//отсутствие 'files' означает, что в результаты будет копироваться папка целиком
-			try{
-				var meta = JSON.parse(fs.readFileSync(tmp, 'utf8'));
-			} catch(e) {
-				console.log('Файл \''+tmp+'\' не является корректным JSON-файлом. Операция компиляции прервана.');
-				console.log('Описание ошибки: '+e);
-				process.exit(1);
-			}
-			if ((!meta.hasOwnProperty('files')) && (tmp != path.resolve(compileIniDir, '__meta__')))
-				continue;
-		}
-
-
-		var children = fs.readdirSync(parent);
-		for (var i = 0 ; i < children.length ; i++){
-			tmp = parent + '/' + children[i];
-			var stat = fs.statSync(tmp);
-			if (stat.isDirectory()){
-				stack.push(tmp);
-			}
-		}
-	}
-	var destDir;
-	while (dirStack.length){
-		var dirCandidate = dirStack.pop();
-		console.log('\033[91mОбрабатываю директорию \''+path.relative(compileIniDir, dirCandidate)+'/\'\033[0m');//выводим красным цветом
-		tmp = dirCandidate+'/__meta__';
-		try{
-			var meta = JSON.parse(fs.readFileSync(tmp, 'utf8'));
-		} catch(e) {
-			console.log('Файл \''+tmp+'\' не является корректным JSON-файлом. Операция компиляции прервана.');
-			console.log('Описание ошибки: '+e);
-			break;
-		}
-		t = compileIniDir;
-		tmp =  path.relative(t, dirCandidate);
-		tmp = path.resolve(t, destPathStart, tmp);
-		tmp = tmp.replace(/\/+/g, '/')
-				 .replace(/(\/)$/, '');
-		if (!applyMeta(meta, dirCandidate, tmp, processor, compileIniDir)){
-			console.log('Операция компиляции прервана.');
-			process.exit(1);
-		}
-	}
-	fse.removeSync(compileIniDir);
-	console.log('\033[93mСборка успешно завершена\033[0m');//выводим жёлтым цветом
-})(proPath);
+if (state === 1){
+	processor(proPath);
 }
-else if (state === 2){
+else {
+	if (state === 3){
+		if (typeof masterTree === 'function'){
+			masterTree(true);
+		}
+		else{
+			console.log('Available subcommands:');
+			for (const o of Object.keys(masterTree)){
+				console.log(`  ${o}`);
+			}
+			console.log(`Call "${command} <subcommand>" for details`);
+		}
+		process.exit(0);
+	}
 	if (typeof masterTree !== 'function'){
 		console.log('incorrect 3', typeof masterTree);
 		process.exit(1);
 	}
-	masterTree();
+	masterTree(false);
 }
 
 function applyMeta(meta, srcPath, destPath, processor, processorDirPath){ 
