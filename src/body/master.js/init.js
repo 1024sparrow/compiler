@@ -1,4 +1,9 @@
-function(){
+function(p_helpNeeded){
+	if (p_helpNeeded){
+		console.log(`
+`);
+		process.exit(0);
+	}
 `
 project/
   src/

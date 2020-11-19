@@ -1,4 +1,9 @@
-function(){
+function(p_helpNeeded){
+	if (p_helpNeeded){
+		console.log(`
+`);
+		process.exit(0);
+	}
 	if (!fs.existsSync('__meta__')){
 		console.log('File \"__meta__\" not found');
 		process.exit(1);

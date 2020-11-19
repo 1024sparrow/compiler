@@ -1,4 +1,9 @@
-function(){
+function(p_helpNeeded){
+	if (p_helpNeeded){
+		console.log(`
+`);
+		process.exit(0);
+	}
 	var srcCand = readlineSync.question('Какой файл надо собрать: ');
 	var tmp;
 	var meta; // of initial splitted version

@@ -87,7 +87,7 @@ if (state == 0){
 	process.exit(1);
 }
 if (state === 1){
-	processor(proPath);
+	applyPro(proPath);
 }
 else {
 	if (state === 3){

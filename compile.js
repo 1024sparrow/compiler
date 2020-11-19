@@ -39,7 +39,12 @@ var
 	//masterTree = {% master.js %%} // отступы: применять только если между предшествующими \n и <space> нет букв
 	masterTree =
 	{ // all functions take one parameter - ifHelp. If passed nonull value then just print help for this function.
-		init: function(){
+		init: function(p_helpNeeded){
+	 	if (p_helpNeeded){
+	 		console.log(`
+	 `);
+	 		process.exit(0);
+	 	}
 	 `
 	 project/
 	   src/
@@ -146,7 +151,12 @@ var
 	 },
 		add:{
 			children:{
-				source: function(p_source){
+				source: function(p_helpNeeded){
+	 	if (p_helpNeeded){
+	 		console.log(`
+	 `);
+	 		process.exit(0);
+	 	}
 	 	if (!fs.existsSync('__meta__')){
 	 		console.log('File \"__meta__\" not found');
 	 		process.exit(1);
@@ -193,7 +203,12 @@ var
 	 	}
 	 	fs.writeFileSync('__meta__', JSON.stringify(meta, undefined, '\t'), 'utf8');
 	 },
-				target: function(){
+				target: function(p_helpNeeded){
+	 	if (p_helpNeeded){
+	 		console.log(`
+	 `);
+	 		process.exit(0);
+	 	}
 	 	if (!fs.existsSync('__meta__')){
 	 		console.log('File \"__meta__\" not found');
 	 		process.exit(1);
@@ -244,7 +259,12 @@ var
 		},
 		rm:{
 			children:{
-				source: function(){
+				source: function(p_helpNeeded){
+	 	if (p_helpNeeded){
+	 		console.log(`
+	 `);
+	 		process.exit(0);
+	 	}
 	 	if (!fs.existsSync('__meta__')){
 	 		console.log('File \"__meta__\" not found');
 	 		process.exit(1);
@@ -294,7 +314,12 @@ var
 	 	} while ((sourceIndexToRemove = readlineSync.keyInSelect(variants, 'Что удалить: '))>= 0);
 	 	fs.writeFileSync('__meta__', JSON.stringify(meta, undefined, '\t'), 'utf8');
 	 },
-				target: function(){
+				target: function(p_helpNeeded){
+	 	if (p_helpNeeded){
+	 		console.log(`
+	 `);
+	 		process.exit(0);
+	 	}
 	 	if (!fs.existsSync('__meta__')){
 	 		console.log('File \"__meta__\" not found');
 	 		process.exit(1);
@@ -331,7 +356,12 @@ var
 	 }
 			}
 		},
-		split: function(){
+		split: function(p_helpNeeded){
+	 	if (p_helpNeeded){
+	 		console.log(`
+	 `);
+	 		process.exit(0);
+	 	}
 	 `
 	 hello.js - as target and as template
 	 
@@ -372,7 +402,12 @@ var
 	 	};
 	 	fs.writeFileSync(path.resolve(srcCand, '__meta__'), JSON.stringify(meta, undefined, '\t'), 'utf8');
 	 },
-		join: function(){
+		join: function(p_helpNeeded){
+	 	if (p_helpNeeded){
+	 		console.log(`
+	 `);
+	 		process.exit(0);
+	 	}
 	 	var srcCand = readlineSync.question('Какой файл надо собрать: ');
 	 	var tmp;
 	 	var meta; // of initial splitted version
@@ -399,13 +434,11 @@ var
 	 	fs.renameSync(srcCand, tmp);
 	 	applyPro(path.resolve(tmp, 'pro'));
 	 	fse.removeSync(tmp);
-	 },
-		// mkdir // вынести цель в отдельную диреторию (когда в одном __meta__ несколько целей)
+	 }
 		/*
 	Допустим, мы создали файл (исходник), разбили его в попдиректорию. Затем добавили туда (в ту поддиреторию) ещё одну цель. Что теперь с этим делать? JOIN-ить не понятно как:
 	РЕШЕНИЕ: собираем несколько файлов (ровно так, как прописано __meta__ файле той диретории, которую мы схлопываем)
 		*/
-		help: true
 	},
 	processor,
 	command = '',
@@ -563,7 +596,7 @@ if (state == 0){
 	process.exit(1);
 }
 if (state === 1){
-	processor(proPath);
+	applyPro(proPath);
 }
 else {
 	if (state === 3){
