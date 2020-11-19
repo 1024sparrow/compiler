@@ -11,6 +11,9 @@ hello.js/
 	hello_func2.js
 `
 	var srcCand = readlineSync.question('Какой файл надо разбить: ');
+	if (!srcCand){
+		process.exit(1);
+	}
 	var content;
 	try{
 		content = fs.readFileSync(srcCand, 'utf8')
