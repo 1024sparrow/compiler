@@ -20,6 +20,10 @@ project/
 		console.log('File \"pro\" already exists');
 		process.exit(1);
 	}
+	if (fs.existsSync('__meta__')){
+		console.log('File \"__meta__\" already exists');
+		process.exit(1);
+	}
 	/*readline.emitKeypressEvents(process.stdin);
 	process.stdin.setRawMode(true);
 	process.stdout.write('');
@@ -91,7 +95,7 @@ project/
 	}
 
 
-	var ifDirNeeded = readlineSync.question('Нужно ли сохранить файлы в отдельной директории (если нет, то все файлы и поддиретории из диретории сборки будут перемещены на уровень выше, а сама диретория сборки будет удалена): [Y/n]') || 'y';
+	var ifDirNeeded = readlineSync.keyInYN('Нужно ли сохранить файлы в отдельной директории (если нет, то все файлы и поддиретории из диретории сборки будут перемещены на уровень выше, а сама диретория сборки будет удалена): [Y/n]') || 'y';
 	ifDirNeeded = (['y', 'Y', 'yes', 'Yes'].indexOf(ifDirNeeded) < 0) ? false : true;
 	if (ifDirNeeded){
 		meta.dir_proc = [];

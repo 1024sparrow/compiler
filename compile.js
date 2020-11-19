@@ -61,6 +61,10 @@ var
 	 		console.log('File \"pro\" already exists');
 	 		process.exit(1);
 	 	}
+	 	if (fs.existsSync('__meta__')){
+	 		console.log('File \"__meta__\" already exists');
+	 		process.exit(1);
+	 	}
 	 	/*readline.emitKeypressEvents(process.stdin);
 	 	process.stdin.setRawMode(true);
 	 	process.stdout.write('');
@@ -132,7 +136,7 @@ var
 	 	}
 	 
 	 
-	 	var ifDirNeeded = readlineSync.question('Нужно ли сохранить файлы в отдельной директории (если нет, то все файлы и поддиретории из диретории сборки будут перемещены на уровень выше, а сама диретория сборки будет удалена): [Y/n]') || 'y';
+	 	var ifDirNeeded = readlineSync.keyInYN('Нужно ли сохранить файлы в отдельной директории (если нет, то все файлы и поддиретории из диретории сборки будут перемещены на уровень выше, а сама диретория сборки будет удалена): [Y/n]') || 'y';
 	 	ifDirNeeded = (['y', 'Y', 'yes', 'Yes'].indexOf(ifDirNeeded) < 0) ? false : true;
 	 	if (ifDirNeeded){
 	 		meta.dir_proc = [];
@@ -154,8 +158,51 @@ var
 	 	var meta = JSON.parse(fs.readFileSync('__meta__', 'utf8'));
 	 },
 				target: function(){
-	 	console.log('not implemented');
-	 	process.exit(1);
+	 	if (!fs.existsSync('__meta__')){
+	 		console.log('File \"__meta__\" not found');
+	 		process.exit(1);
+	 	}
+	 	try{
+	 		var meta = JSON.parse(fs.readFileSync('__meta__', 'utf8'));
+	 	} catch(e) {
+	 		console.log('Файл __meta__ не является корректным JSON-файлом. Операция добавления цели сборки прервана.');
+	 		console.log('Описание ошибки: '+e);
+	 		process.exit(1);
+	 	}
+	 	if (!meta.hasOwnProperty('files')){
+	 		meta.files = [];
+	 	}
+	 	var targetCand = readlineSync.question('Какой файл добавить к списку целей сборки: ');
+	 	if (!targetCand){
+	 		process.exit(1);
+	 	}
+	 	for (const o of meta.files){
+	 		if (o.target === targetCand){
+	 			console.log(`Target "${targetCand}" already exists`);
+	 			process.exit(1);
+	 		}
+	 	}
+	 	for (const oTarget of meta.files){
+	 		if (oTarget.source.list.indexOf(targetCand) >= 0){
+	 			console.log(`File "${targetCand} already use as source in target "${oTarget.target}""`);
+	 			process.exit(1);
+	 		}
+	 		if (oTarget.source.template === targetCand){
+	 			console.log(`File "${targetCand} already use as template in target "${oTarget.target}""`);
+	 			process.exit(1);
+	 		}
+	 	}
+	 	if (!fs.existsSync(targetCand)){
+	 		fs.writeFileSync(targetCand, '', 'utf8');
+	 	}
+	 	meta.files.push({
+	 		target: targetCand,
+	 		source:{
+	 			template: targetCand,
+	 			list: []
+	 		}
+	 	});
+	 	fs.writeFileSync('__meta__', JSON.stringify(meta, undefined, '\t'), 'utf8');
 	 }
 			}
 		},
@@ -164,6 +211,41 @@ var
 				source: function(){
 	 },
 				target: function(){
+	 	if (!fs.existsSync('__meta__')){
+	 		console.log('File \"__meta__\" not found');
+	 		process.exit(1);
+	 	}
+	 	try{
+	 		var meta = JSON.parse(fs.readFileSync('__meta__', 'utf8'));
+	 	} catch(e) {
+	 		console.log('Файл __meta__ не является корректным JSON-файлом. Операция добавления цели сборки прервана.');
+	 		console.log('Описание ошибки: '+e);
+	 		process.exit(1);
+	 	}
+	 	//if (!meta.hasOwnProperty('files') || meta){
+	 	if ((meta.files || []).length === 0){
+	 		console.log('Целей сборки нет: удалять нечего');
+	 		if (meta.hasOwnProperty('files')){
+	 			meta.files = undefined;
+	 			fs.writeFileSync('__meta__', JSON.stringify(meta, undefined, '\t'), 'utf8');
+	 		}
+	 		process.exit(0);
+	 	}
+	 	let variants = [];
+	 	for (const oTarget of meta.files){
+	 		variants.push(oTarget.target);
+	 	}
+	 	let indexToRemove = readlineSync.keyInSelect(variants, 'Выберите, что необходимо удалить: ');
+	 	console.log('indexToRemove: ', indexToRemove);
+	 	if (indexToRemove < 0){
+	 		process.exit(1);
+	 	}
+	 	meta.files.splice(indexToRemove, 1);
+	 	if (meta.files.length === 0){
+	 		meta.files = undefined;
+	 	}
+	 	fs.writeFileSync('__meta__', JSON.stringify(meta, undefined, '\t'), 'utf8');
+	 	process.exit(0);
 	 }
 			}
 		},
