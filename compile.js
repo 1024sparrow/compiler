@@ -126,7 +126,6 @@ var
 	 	while (tmp = readlineSync.question('> ')){
 	 		targets.push(tmp);
 	 	}
-	 	console.log(JSON.stringify(targets));
 	 	if (targets.length > 0){
 	 		meta.files = [];
 	 		for (const o of targets){
@@ -136,8 +135,7 @@ var
 	 	}
 	 
 	 
-	 	var ifDirNeeded = readlineSync.keyInYN('Нужно ли сохранить файлы в отдельной директории (если нет, то все файлы и поддиретории из диретории сборки будут перемещены на уровень выше, а сама диретория сборки будет удалена): [Y/n]') || 'y';
-	 	ifDirNeeded = (['y', 'Y', 'yes', 'Yes'].indexOf(ifDirNeeded) < 0) ? false : true;
+	 	var ifDirNeeded = readlineSync.keyInYN('Нужно ли сохранить файлы в отдельной директории (если нет, то все файлы и поддиретории из диретории сборки будут перемещены на уровень выше, а сама диретория сборки будет удалена): [Y/n] ');
 	 	if (ifDirNeeded){
 	 		meta.dir_proc = [];
 	 	}
@@ -149,13 +147,51 @@ var
 		add:{
 			children:{
 				source: function(p_source){
-	 	const fs = require('fs');
 	 	if (!fs.existsSync('__meta__')){
-	 		//fs.writeFileSync('__meta__', '', 'utf8');
-	 		console.log('There is not __meta__ file');
+	 		console.log('File \"__meta__\" not found');
 	 		process.exit(1);
 	 	}
-	 	var meta = JSON.parse(fs.readFileSync('__meta__', 'utf8'));
+	 	try{
+	 		var meta = JSON.parse(fs.readFileSync('__meta__', 'utf8'));
+	 	} catch(e) {
+	 		console.log('Файл __meta__ не является корректным JSON-файлом. Операция добавления цели сборки прервана.');
+	 		console.log('Описание ошибки: '+e);
+	 		process.exit(1);
+	 	}
+	 	if (!meta.hasOwnProperty('files')){
+	 		meta.files = [];
+	 	}
+	 	let variants = [];
+	 	for (const oTarget of meta.files){
+	 		variants.push(oTarget.target);
+	 	}
+	 	let targetIndex = readlineSync.keyInSelect(variants, 'Выберите цель сборки, к которой надо добавить исходник: ');
+	 	if (targetIndex < 0){
+	 		process.exit(1);
+	 	}
+	 	var tmp = meta.files[targetIndex];
+	 	if (meta.files[targetIndex].source.list.length === 0){
+	 		console.log(`В данный момент для сборки цели "${tmp.target}" не используются какие-либо исходники`);
+	 	}
+	 	else{
+	 		console.log(`В данный момент для сборки цели "${tmp.target}" используются следующие исходники:`);
+	 		for (const oSrc of meta.files[targetIndex].source.list){
+	 			console.log(oSrc);
+	 		}
+	 	}
+	 	var sources = [];
+	 	console.log('Вводите имена файлов, которые должны быть в результате сборки (каждый файл на отдельной строке, окончание ввода - дважды "Enter")');
+	 	var tmp;
+	 	while (tmp = readlineSync.question('> ')){
+	 		sources.push(tmp);
+	 	}
+	 	for (const oSourceCand of sources){
+	 		if (!fs.existsSync(oSourceCand)){
+	 			fs.writeFileSync(oSourceCand, '', 'utf8');
+	 		}
+	 		meta.files[targetIndex].source.list.push(oSourceCand);
+	 	}
+	 	fs.writeFileSync('__meta__', JSON.stringify(meta, undefined, '\t'), 'utf8');
 	 },
 				target: function(){
 	 	if (!fs.existsSync('__meta__')){
@@ -209,6 +245,54 @@ var
 		rm:{
 			children:{
 				source: function(){
+	 	if (!fs.existsSync('__meta__')){
+	 		console.log('File \"__meta__\" not found');
+	 		process.exit(1);
+	 	}
+	 	try{
+	 		var meta = JSON.parse(fs.readFileSync('__meta__', 'utf8'));
+	 	} catch(e) {
+	 		console.log('Файл __meta__ не является корректным JSON-файлом. Операция добавления цели сборки прервана.');
+	 		console.log('Описание ошибки: '+e);
+	 		process.exit(1);
+	 	}
+	 	if ((meta.files || []).length === 0){
+	 		console.log('Целей сборки нет: удалять нечего');
+	 		if (meta.hasOwnProperty('files')){
+	 			meta.files = undefined;
+	 			fs.writeFileSync('__meta__', JSON.stringify(meta, undefined, '\t'), 'utf8');
+	 		}
+	 		process.exit(0);
+	 	}
+	 	let variants = [];
+	 	for (const oTarget of meta.files){
+	 		variants.push(oTarget.target);
+	 	}
+	 	let targetIndex = readlineSync.keyInSelect(variants, 'Выберите цель сборки, от которой надо открепить исходники: ');
+	 	if (targetIndex < 0){
+	 		process.exit(1);
+	 	}
+	 	var tmp = meta.files[targetIndex];
+	 	if (meta.files[targetIndex].source.list.length === 0){
+	 		console.log(`В данный момент для сборки цели "${tmp.target}" не используются какие-либо исходники`);
+	 		process.exit(1);
+	 	}
+	 	var sourceIndexToRemove;
+	 	do{
+	 		if (sourceIndexToRemove !== undefined){
+	 			tmp.source.list.splice(sourceIndexToRemove, 1);
+	 		}
+	 		if (tmp.source.list.length === 0){
+	 			console.log(`Удалены все исходники из цели сбрки "${tmp.target}"`);
+	 			break;
+	 		}
+	 		variants = []
+	 		for (const oSrc of tmp.source.list){
+	 			variants.push(oSrc);
+	 		}
+	 		console.log(`В данный момент для сборки цели "${tmp.target}" используются следующие исходники:`);
+	 	} while ((sourceIndexToRemove = readlineSync.keyInSelect(variants, 'Что удалить: '))>= 0);
+	 	fs.writeFileSync('__meta__', JSON.stringify(meta, undefined, '\t'), 'utf8');
 	 },
 				target: function(){
 	 	if (!fs.existsSync('__meta__')){
@@ -222,7 +306,6 @@ var
 	 		console.log('Описание ошибки: '+e);
 	 		process.exit(1);
 	 	}
-	 	//if (!meta.hasOwnProperty('files') || meta){
 	 	if ((meta.files || []).length === 0){
 	 		console.log('Целей сборки нет: удалять нечего');
 	 		if (meta.hasOwnProperty('files')){
@@ -236,7 +319,6 @@ var
 	 		variants.push(oTarget.target);
 	 	}
 	 	let indexToRemove = readlineSync.keyInSelect(variants, 'Выберите, что необходимо удалить: ');
-	 	console.log('indexToRemove: ', indexToRemove);
 	 	if (indexToRemove < 0){
 	 		process.exit(1);
 	 	}

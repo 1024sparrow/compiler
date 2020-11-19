@@ -23,7 +23,6 @@ function(){
 		variants.push(oTarget.target);
 	}
 	let indexToRemove = readlineSync.keyInSelect(variants, 'Выберите, что необходимо удалить: ');
-	console.log('indexToRemove: ', indexToRemove);
 	if (indexToRemove < 0){
 		process.exit(1);
 	}

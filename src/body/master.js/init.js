@@ -85,7 +85,6 @@ project/
 	while (tmp = readlineSync.question('> ')){
 		targets.push(tmp);
 	}
-	console.log(JSON.stringify(targets));
 	if (targets.length > 0){
 		meta.files = [];
 		for (const o of targets){
@@ -95,8 +94,7 @@ project/
 	}
 
 
-	var ifDirNeeded = readlineSync.keyInYN('Нужно ли сохранить файлы в отдельной директории (если нет, то все файлы и поддиретории из диретории сборки будут перемещены на уровень выше, а сама диретория сборки будет удалена): [Y/n]') || 'y';
-	ifDirNeeded = (['y', 'Y', 'yes', 'Yes'].indexOf(ifDirNeeded) < 0) ? false : true;
+	var ifDirNeeded = readlineSync.keyInYN('Нужно ли сохранить файлы в отдельной директории (если нет, то все файлы и поддиретории из диретории сборки будут перемещены на уровень выше, а сама диретория сборки будет удалена): [Y/n] ');
 	if (ifDirNeeded){
 		meta.dir_proc = [];
 	}
