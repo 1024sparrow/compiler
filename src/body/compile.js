@@ -36,6 +36,14 @@ for (oArg of process.argv){
 		console.log('{%% help.txt %%} '); // тут выявилась бага обработки файлов: на вход обработчика файла попадает закрывающая кавычка
 		process.exit(0);
 	}
+	else if (oArg === '--version'){
+		console.log('{%% version %%}');
+		process.exit(0);
+	}
+	else if (oArg === '--changelog'){
+		console.log('{%% changelog %%} ');
+		process.exit(0);
+	}
 }
 
 for (iArg = 2 ; iArg < process.argv.length ; ++iArg){
