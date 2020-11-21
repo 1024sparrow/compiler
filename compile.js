@@ -676,6 +676,9 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
 						return false;
 					}
 				}
+				if (tmp[tmp.length - 1] === '\n'){
+					tmp = tmp.slice(0, -1);
+				}
 				if (file.source.hasOwnProperty('types') && file.source.types.hasOwnProperty(srcFile)){
 					for (const filetype of file.source.types[srcFile]){
 						if (processor.file.hasOwnProperty(filetype)){
@@ -733,11 +736,11 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
 								}
 							}
 						}
-						retval = retval.slice(0, i) + tmp.slice(0, -1) + retval.slice(i + key.length);
+						retval = retval.slice(0, i) + tmp + retval.slice(i + key.length);
 					}
 				}
 				else{
-					retval += tmp;
+					retval += tmp + '\n';
 				}
 			}
 			//Применяем обработчики к получившемуся файлу
