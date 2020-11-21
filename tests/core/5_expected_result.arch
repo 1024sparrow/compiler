@@ -1,0 +1,38 @@
+# compiled/test
+console.log('1234 5678');
+# src/help.txt
+1234 5678
+# src/__meta__
+{
+	"files": [
+		{
+			"target": "test",
+			"source": {
+				"template": "test",
+				"list": [
+					"help.txt"
+				],
+				"types":{
+					"help.txt": ["text"]
+				}
+			}
+		}
+	],
+	"dir_proc": []
+}
+# src/pro
+module.exports = {
+	target: '../compiled',
+	file:{
+		text: function(s) {
+			return s
+				.replace(/"/g, '\\"')
+				.replace(/'/g, '\\\'')
+				.replace(/\n/g, '\\n')
+			;
+		}
+	},
+	dir:{}
+}
+# src/test
+console.log('{%% help.txt %%}');

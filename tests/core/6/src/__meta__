@@ -1,0 +1,13 @@
+{
+	"files": [
+		{
+			"target": "test",
+			"source": {
+				"template": "test",
+				"list": [
+					"help.txt"
+				]
+			}
+		}
+	]
+}

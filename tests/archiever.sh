@@ -1,5 +1,7 @@
 #!/bin/bash
 
+debug=false # отладка этого скрипта: вывод в консоль вместо всех файловых операций
+
 for i in $*
 do
 	if [[ "$i" == "--help" ]]
@@ -31,7 +33,7 @@ function extract {
 	local tmpFile
 	local tmp
 
-	while IFS= read line
+	while IFS= read -r line
 	do
 		#echo "$line"
 		if [[ "$line" =~ ^##.* ]]
@@ -75,10 +77,20 @@ function empack {
 			then
 				#echo "file: \"$tmpFile\""
 				tmp=$((${#dirpath}+1))
-				echo "# ${tmpFile:$tmp}" >> "$filepath"
-				while IFS= read textLine
+				if $debug
+				then
+					echo "# ${tmpFile:$tmp}"
+				else
+					echo "# ${tmpFile:$tmp}" >> "$filepath"
+				fi
+				while IFS= read -r textLine
 				do
-					echo "$textLine" >> "$filepath"
+					if $debug
+					then
+						echo "$textLine"
+					else
+						echo "$textLine" >> "$filepath"
+					fi
 				done < "$tmpFile"
 			fi
 		fi
