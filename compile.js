@@ -556,11 +556,11 @@ for (oArg of process.argv){
 		process.exit(0);
 	}
 	else if (oArg === '--version'){
-		console.log('1.2');
+		console.log('1.3');
 		process.exit(0);
 	}
 	else if (oArg === '--changelog'){
-		console.log('1.2 - issue 1, bug 1.1. Поправлены отступы вставляемого из другого файла теста.\n1.1 - добавлен режим мастера (\"init\", \"add target\", \"rm target\", \"add source\", \"rm source\", \"join\", \"split\")\ ');
+		console.log('1.3 - issue 1, bug 1.2. Исправлена потеря последнего символа вставляемого текста и подача лишнего символа на вход обрабочика файлов.\n1.2 - issue 1, bug 1.1. Поправлены отступы вставляемого из другого файла теста.\n1.1 - добавлен режим мастера (\"init\", \"add target\", \"rm target\", \"add source\", \"rm source\", \"join\", \"split\")\ ');
 		process.exit(0);
 	}
 }
