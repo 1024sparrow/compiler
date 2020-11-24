@@ -556,11 +556,11 @@ for (oArg of process.argv){
 		process.exit(0);
 	}
 	else if (oArg === '--version'){
-		console.log('1.3');
+		console.log('1.4');
 		process.exit(0);
 	}
 	else if (oArg === '--changelog'){
-		console.log('1.3 - issue 1, bug 1.2. Исправлена потеря последнего символа вставляемого текста и подача лишнего символа на вход обрабочика файлов.\n1.2 - issue 1, bug 1.1. Поправлены отступы вставляемого из другого файла теста.\n1.1 - добавлен режим мастера (\"init\", \"add target\", \"rm target\", \"add source\", \"rm source\", \"join\", \"split\")\ ');
+		console.log('1.4 - Теперь на вход обработчикам файлов можно подавать бинарные файлы(только исходники, обработка результатов сборки ещё такого не поддерживает). Обработчики файлов, как и раньше, получают единственным аргументом путь до временного файла, содержимое которого необходимо обновить.\n1.3 - issue 1, bug 1.2. Исправлена потеря последнего символа вставляемого текста и подача лишнего символа на вход обрабочика файлов.\n1.2 - issue 1, bug 1.1. Поправлены отступы вставляемого из другого файла теста.\n1.1 - добавлен режим мастера (\"init\", \"add target\", \"rm target\", \"add source\", \"rm source\", \"join\", \"split\")\ ');
 		process.exit(0);
 	}
 }
@@ -663,29 +663,20 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
 			}
 			for (const srcFile of file.source.list){
 				let tmp = destPath + '/'  + srcFile;
-				if (fs.existsSync(tmp)){
-					tmp = fs.readFileSync(tmp, 'utf8');
-					//мы использовали в качестве исходников результаты компиляции поддиректории - мы должны будем перед окончанием компиляции текущей директории удалить эту директорию с исходниками (это надо делать ДО того, как будут мёржиться временная директория в целевую)
-				}
-				else{
+				if (!fs.existsSync(tmp)){
 					tmp = srcPath + '/'  + srcFile;
-					if (fs.existsSync(tmp))
-						tmp = fs.readFileSync(tmp, 'utf8');
-					else{
+					if (!fs.existsSync(tmp)){
 						console.log(`Не найден файл ${tmp}: операция компиляции прервана.`);
 						return false;
 					}
 				}
-				if (tmp[tmp.length - 1] === '\n'){
-					tmp = tmp.slice(0, -1);
-				}
 				if (file.source.hasOwnProperty('types') && file.source.types.hasOwnProperty(srcFile)){
+					tmp = fse.copySync(tmp, tmpFile.name);
 					for (const filetype of file.source.types[srcFile]){
 						if (processor.file.hasOwnProperty(filetype)){
 							const tmpFunc = processor.file[filetype];
 							const tmpType = typeof tmpFunc;
 							if (tmpType === 'string'){
-								fs.writeFileSync(tmpFile.name, tmp, 'utf8');
 								const tt = path.resolve(processorDirPath, tmpFunc) + ' ' + tmpFile.name;
 								const ou = child_process.execSync(tt, {encoding:'utf8', stdio:[0,1,2]});
 								if (ou)
@@ -704,6 +695,12 @@ function applyMeta(meta, srcPath, destPath, processor, processorDirPath){
 						else{
 							console.log(`Для типа файла '${filetype}' не найден обработчик: файл остался необработанным.`);
 						}
+					}
+				}
+				else{
+					tmp = fs.readFileSync(tmp, 'utf8');
+					if (tmp[tmp.length - 1] === '\n'){
+						tmp = tmp.slice(0, -1);
 					}
 				}
 				if (hasTempl){
