@@ -454,7 +454,7 @@ var
 	command = '',
 	applyPro = function(compileIniPath){
 	var tmp, t;
-	var compile_ini_path = path.resolve(path.resolve('./'), compileIniPath);
+	var compile_ini_path = path.resolve(compileIniPath);
 	try{
 		var processor = require(compile_ini_path);
 	} catch (err) {
